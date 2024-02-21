@@ -1,17 +1,20 @@
-// const jetpack = require("fs-jetpack");
+import { SeedVarieties } from "../data/SeedVarieties";
 
 function saveSeeds(seeds) {
   console.log(seeds);
   localStorage.setItem("seed-inventory", JSON.stringify(seeds));
-  // jetpack.write("seed-inventory.json", seeds);
 }
 
 function loadSeeds() {
-  const seeds = localStorage.getItem("seed-inventory");
-  //   const seeds = jetpack.read("seed-inventory.json", "json");
+  let seeds = localStorage.getItem("seed-inventory");
   if (!seeds) {
-    saveSeeds([]);
-    return [];
+    if (window.confirm("Do you want to use the pre-saved seed set?")) {
+      seeds = SeedVarieties;
+    } else {
+      seeds = [];
+    }
+    saveSeeds(seeds);
+    return seeds;
   } else {
     return JSON.parse(seeds);
   }
