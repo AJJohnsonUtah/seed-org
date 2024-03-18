@@ -1,9 +1,8 @@
 import { Add } from "@mui/icons-material";
 import { Container, Fab, Grid, Typography } from "@mui/material";
 import React, { useState } from "react";
-import FloralMixCalendarDisplay from "../FloralMixCalendar/FloralMixCalendarDisplay";
-import SeedAdder from "./SeedAdder";
-import { SeedInventoryService } from "./SeedInventoryService";
+import { SeedInventoryService } from "../common/services/SeedInventoryService";
+import SeedDialog from "./SeedDialog";
 import SeedSummary from "./SeedSummary";
 
 const defaultSeed = {
@@ -14,12 +13,17 @@ const defaultSeed = {
   maxDtm: "",
   startIndoorsMinWeeks: "",
   startIndoorsMaxWeeks: "",
+  colors: [],
 };
 
 export default function SeedList() {
   const [seedToAdd, setSeedToAdd] = React.useState(null);
-  const [seeds, setSeeds] = useState(SeedInventoryService.loadSeeds());
+  const [seeds, setSeeds] = useState([]);
   const [showNewSeed, setShowNewSeed] = useState(false);
+
+  React.useEffect(() => {
+    SeedInventoryService.loadSeeds().then(setSeeds);
+  }, []);
 
   function beginAddingSeed() {
     setSeedToAdd({ ...defaultSeed });
@@ -27,16 +31,16 @@ export default function SeedList() {
   }
 
   function updateSeeds(newSeeds) {
+    // Alphabetize Seeds
     newSeeds.sort((a, b) => (a.name > b.name ? 1 : -1));
     setSeeds(newSeeds);
-    SeedInventoryService.saveSeeds(newSeeds);
   }
 
   function addSeed(seed) {
     seeds.push(seed);
-    updateSeeds(seeds);
+    updateSeeds([...seeds]);
     setShowNewSeed(false);
-    setSeedToAdd(null);
+    setSeedToAdd({ ...defaultSeed });
     setTimeout(() => setShowNewSeed(true), 100);
   }
 
@@ -45,7 +49,7 @@ export default function SeedList() {
       <Typography variant="h4">Seed Inventory</Typography>
       <Grid container spacing={1}>
         {seeds.map((seed, i) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
+          <Grid item xs={12} sm={6} md={4} lg={3} key={seed._id}>
             <SeedSummary
               seed={seed}
               onSaveChanges={(updatedSeed) => {
@@ -60,7 +64,7 @@ export default function SeedList() {
           </Grid>
         ))}
       </Grid>
-      {<SeedAdder open={showNewSeed} seed={seedToAdd} onSaveChanges={addSeed} onCancel={() => setShowNewSeed(false)} />}
+      {<SeedDialog open={showNewSeed} seed={seedToAdd} onSaveChanges={addSeed} onCancel={() => setShowNewSeed(false)} />}
       {!showNewSeed && (
         <Fab
           type="button"
@@ -72,7 +76,6 @@ export default function SeedList() {
           <Add />
         </Fab>
       )}
-      <FloralMixCalendarDisplay />
     </Container>
   );
 }

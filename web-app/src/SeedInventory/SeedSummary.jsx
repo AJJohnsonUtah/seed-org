@@ -1,6 +1,7 @@
 import { Card, CardActionArea, CardMedia, Grid, Typography } from "@mui/material";
 import React from "react";
-import SeedAdder from "./SeedAdder";
+import { getNumPlantsInArea, getRowWidthForTargetPlantCount } from "../PlantLayout/LayoutCalculator";
+import SeedDialog from "./SeedDialog";
 
 export default function SeedSummary({ seed, onSaveChanges, onDelete }) {
   const [editingSeed, setEditingSeed] = React.useState(false);
@@ -12,11 +13,15 @@ export default function SeedSummary({ seed, onSaveChanges, onDelete }) {
 
   return (
     <Card>
-      <SeedAdder
+      <SeedDialog
         open={editingSeed}
         seed={{ ...seed }}
         onSaveChanges={saveEdit}
         onCancel={() => setEditingSeed(false)}
+        onDelete={() => {
+          setEditingSeed(false);
+          onDelete();
+        }}
       />
       <CardActionArea onClick={() => setEditingSeed(true)}>
         {seed.picUrl && <CardMedia component="img" height="180" image={seed.picUrl} alt={seed.name} />}
@@ -51,7 +56,13 @@ export default function SeedSummary({ seed, onSaveChanges, onDelete }) {
             </Grid>
           </Grid>
           <Grid item xs={12} style={{ background: "rgba(255, 255, 255, 0.75)", paddingLeft: 6, paddingRight: 6 }}>
-            {seed.minDtm === seed.maxDtm ? seed.minDtm : `${seed.minDtm}-${seed.maxDtm}`} DTM
+            {seed.minDtm === seed.maxDtm ? seed.minDtm : `${seed.minDtm}-${seed.maxDtm}`} DTM.{" "}
+            {getRowWidthForTargetPlantCount(36, seed.spacingInches, seed.seedsPerPacket * seed.numPackets) / 12} row ft.{" "}
+            {getNumPlantsInArea(
+              getRowWidthForTargetPlantCount(36, seed.spacingInches, seed.seedsPerPacket * seed.numPackets),
+              36,
+              seed.spacingInches
+            )}
           </Grid>
           <Grid
             item
@@ -71,16 +82,6 @@ export default function SeedSummary({ seed, onSaveChanges, onDelete }) {
             </Grid>
           </Grid>
         </Grid>
-        {/* <IconButton
-          onClick={() => {
-            if (window.confirm("Are you sure you want to delete " + seed.name + "?")) {
-              onDelete(seed);
-            }
-          }}
-          type="button"
-        >
-          <Delete />
-        </IconButton> */}
       </CardActionArea>
     </Card>
   );

@@ -1,8 +1,8 @@
 import { Divider, Grid, Paper, Typography } from "@mui/material";
 import moment from "moment";
 import React from "react";
-import { SeedInventoryService } from "../SeedInventory/SeedInventoryService";
-import { LAST_FROST } from "../data/FarmConstants";
+import { SeedInventoryService } from "../common/services/SeedInventoryService";
+import { LAST_FROST_32 } from "../data/FarmConstants";
 import PlantCalendarRow from "./PlantCalendarRow";
 
 const containerWidth = 1300;
@@ -39,7 +39,11 @@ export function GrowingCalendarRows({ seeds, label }) {
 }
 
 export default function FloralMixCalendarDisplay() {
-  const [seeds, setSeeds] = React.useState([...SeedInventoryService.loadSeeds()]);
+  const [seeds, setSeeds] = React.useState([]);
+
+  React.useEffect(() => {
+    SeedInventoryService.loadSeeds().then((s) => setSeeds([...s]));
+  }, []);
 
   const [seedCalendar, setSeedCalendar] = React.useState([]);
   const months = [
@@ -63,11 +67,11 @@ export default function FloralMixCalendarDisplay() {
 
       if (seed.startIndoorsMaxWeeks) {
         // Date to plant is date of last frost minus max weeks
-        seed.plantDate = moment(LAST_FROST).subtract(seed.startIndoorsMaxWeeks, "weeks");
-        seed.transplantDate = moment(LAST_FROST);
+        seed.plantDate = moment(LAST_FROST_32).subtract(seed.startIndoorsMaxWeeks, "weeks");
+        seed.transplantDate = moment(LAST_FROST_32);
       } else {
         // Date to plant is date of last frost, if direct sow
-        seed.plantDate = moment(LAST_FROST);
+        seed.plantDate = moment(LAST_FROST_32);
       }
       seed.plantMatureStartDate = moment(seed.plantDate).add(seed.minDtm, "days");
       const daysToAdd = +seed.minDtm + (seed.bloomDurationDays || 40);

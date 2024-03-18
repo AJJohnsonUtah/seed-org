@@ -2,6 +2,21 @@ import { Tooltip } from "@mui/material";
 import moment from "moment";
 import React from "react";
 
+export function getBgColorString(colors) {
+  if (!colors || colors.length === 0) {
+    return "pink";
+  }
+
+  let i = 0;
+  let colorString = `repeating-linear-gradient(45deg`;
+  while (i < colors.length) {
+    colorString += `, ${colors[i]} ${i * 10}px, ${colors[i]} ${(i + 1) * 10}px`;
+    i++;
+  }
+  colorString += ")";
+  return colorString;
+}
+
 export default function PlantCalendarRow({ seed, pxPerDay = 4 }) {
   let { plantDate, plantMatureStartDate, plantMatureEndDate, transplantDate } = seed;
 
@@ -22,7 +37,7 @@ export default function PlantCalendarRow({ seed, pxPerDay = 4 }) {
           <p>Plant Matures: {plantMatureStartDate.format("L")}</p>
         </div>
       }
-      placement='bottom-start'
+      placement="bottom-start"
     >
       <div style={{ width: pxPerDay * totalDays + 1, borderRadius: 4, height: 12, display: "inline-block" }}>
         {transplantDate && (
@@ -60,7 +75,7 @@ export default function PlantCalendarRow({ seed, pxPerDay = 4 }) {
             maxWidth: (workingPlantMatureEndDate.diff(workingPlantMatureStartDate, "days") * 100) / totalDays + "%",
             overflow: "hidden",
             height: "100%",
-            background: "pink",
+            background: getBgColorString(seed.plantColors),
             display: "inline-block",
           }}
         >
