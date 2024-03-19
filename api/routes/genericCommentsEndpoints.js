@@ -7,6 +7,8 @@ function addCommentEndpointsForModel(router, BaseModel) {
   const upload = multer({ storage });
   const fs = require("node:fs");
 
+  console.log(process.env);
+
   const ATTACHMENT_BASE_PATH = process.env.NODE_ENV === "production" ? "/app-attachments" : "attachments";
 
   function saveAttachmentContent(path, filename, content) {
