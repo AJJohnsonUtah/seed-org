@@ -7,6 +7,8 @@ function addCommentEndpointsForModel(router, BaseModel) {
   const upload = multer({ storage });
   const fs = require("node:fs");
 
+  const ATTACHMENT_BASE_PATH = process.env.NODE_ENV === "production" ? "/app-attachments" : "attachments";
+
   function saveAttachmentContent(path, filename, content) {
     fs.mkdirSync(path, { recursive: true });
     fs.writeFileSync(path + "/" + filename, content);
@@ -58,7 +60,7 @@ function addCommentEndpointsForModel(router, BaseModel) {
   /* DELETE base comment*/
   router.delete("/:_id/comments/:_commentId", function (req, res, next) {
     try {
-      const dirToDelete = `attachments/${req.params._id}/${req.params._commentId}`;
+      const dirToDelete = `${ATTACHMENT_BASE_PATH}/${req.params._id}/${req.params._commentId}`;
       fs.rmSync(dirToDelete, { recursive: true, force: true });
     } catch (err) {
       if (!err.message.includes("no such file or directory")) {
@@ -102,7 +104,7 @@ function addCommentEndpointsForModel(router, BaseModel) {
         const updatedComment = updatedBase.comments.find((c) => c._id.equals(req.params._commentId));
         const newAttachment = updatedComment.attachments[updatedComment.attachments.length - 1];
         saveAttachmentContent(
-          `attachments/${req.params._id}/${req.params._commentId}/${newAttachment._id}`,
+          `${ATTACHMENT_BASE_PATH}/${req.params._id}/${req.params._commentId}/${newAttachment._id}`,
           newAttachment.name,
           req.file.buffer
         );
@@ -114,7 +116,7 @@ function addCommentEndpointsForModel(router, BaseModel) {
   router.get("/:_id/comments/:_commentId/fileAttachment/:_attachmentId/:fileName", async function (req, res) {
     const path = require("path");
     const pathToFile = path.resolve(
-      `attachments/${req.params._id}/${req.params._commentId}/${req.params._attachmentId}/${req.params.fileName}`
+      `${ATTACHMENT_BASE_PATH}/${req.params._id}/${req.params._commentId}/${req.params._attachmentId}/${req.params.fileName}`
     );
     res.sendFile(pathToFile);
   });
