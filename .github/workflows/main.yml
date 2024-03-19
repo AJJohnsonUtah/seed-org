@@ -19,7 +19,7 @@ jobs:
       working-directory: ./web-app
       run: npm run build
 
-    - name: deploy file to server
+    - name: deploy web-app to server
       uses: wlixcc/SFTP-Deploy-Action@v1.2.4
       with:
         username: 'root'
@@ -28,4 +28,22 @@ jobs:
         local_path: './web-app/build/*'
         remote_path: '/root/web-app'
         sftpArgs: '-o ConnectTimeout=5'
+
+    - name: deploy api to server
+      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      with:
+        username: 'root'
+        server: '146.190.39.218'
+        ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+        local_path: './api/*'
+        remote_path: '/root/api'
+        sftpArgs: '-o ConnectTimeout=5'
         
+    - name: Redeploy API
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: '146.190.39.218'
+        username: 'root'
+        port: 22
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: pm2 restart app-api
