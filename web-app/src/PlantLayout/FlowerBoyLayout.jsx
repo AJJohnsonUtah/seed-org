@@ -11,7 +11,7 @@ export default function FlowerBoyLayout() {
   const { plantings, addNewPlanting } = usePlantingContext();
   const [rowsNeeded, setRowsNeeded] = React.useState(0);
   const [draggablePlantings, setDraggablePlantings] = React.useState([]);
-  const [bedRows, setBedRows] = React.useState([
+  const [bedRows] = React.useState([
     { name: "1", lengthInches: 600, widthInches: 36, plantings: [] },
     { name: "2", lengthInches: 600, widthInches: 36, plantings: [] },
     { name: "3", lengthInches: 600, widthInches: 36, plantings: [] },

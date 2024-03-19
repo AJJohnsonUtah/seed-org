@@ -359,6 +359,9 @@ export default function OrderDialog({ open, orderToEdit, onSave, onDelete, onCan
                 {(getCostNumber(subtotalCost) - itemCostPretax).toFixed(2)}
               </Typography>
             </Grid>
+            <Grid item xs={12}>
+              {orderAttachments.length === 0 && <Typography variant="body1">No attachments found</Typography>}
+            </Grid>
           </Grid>
         </Grid>
       </DialogContent>

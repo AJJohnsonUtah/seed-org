@@ -33,6 +33,11 @@ export function getRowWidthForTargetPlantCount(rowHeight, spacing, targetPlantCo
   return possibleWidth;
 }
 
+/**
+ * UNUSED AT the moment
+ * @param {*} plantings 
+ * @returns 
+ */
 export function optimizePlantings(plantings) {
   let inchesNeeded = 0;
   let lengths = [];
@@ -47,5 +52,5 @@ export function optimizePlantings(plantings) {
   }
   plantings.sort((a, b) => b.inchesNeeded - a.inchesNeeded);
 
-  let bestSolution;
+  return inchesNeeded;
 }
