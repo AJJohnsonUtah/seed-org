@@ -19,19 +19,13 @@ jobs:
       working-directory: ./web-app
       run: npm run build
 
-    - name: SFTP Push
-      # You may pin to the exact commit or the version.
-      # uses: datanomi/SFTP-Push@856acb306cfa4d21ef922e5d5d1ffd03f401e92a
-      uses: datanomi/SFTP-Push@v.1.2.2.1h
+    - name: deploy file to server
+      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
       with:
-        # username
-        username: root
-        # your sftp server
-        server: 146.190.39.218
-        # you can copy private_key from your *.pem file, keep format
-        ssh_private_key: AAABADl6FaMF7Iq2F6F7Cw+iWl5CSVqdBYrIUtCgGJL9fHR/A3FdovkWxi3xlLX7upcb78P+s+zwh9BpAYlzNheHXevRQJhHQlhYyweCAiFxZoL1nndvvVYzQ26LOPK12L4bbTKK0xkFb0vDe4ULTeLwuxzHwmZea+Tu/MerGP/qUN5UjOQbFG+0P8A2dbGxycaXrCHCc/UwpWqPGsxTvDO9AVKMWMuvgoRK33vSPyRuSSftFjvw4GuqNHCMXacnCZN5PEFv+dtrSBKCT3I2KiPVd9KP2Fkls54KJEbKJejpbbMZIn9no5I/MtLTWybihDpPzEwFpWvvUfrjXzIDRd44ZgEAAACBAMbyWDdingMytE305sqkHJsKVcq+qnLI455IMYq+HlqBVAhTsASji5fCCV59xrC8LWtcOgusVF76CQ9tqRMxqjfQFFf8NOvgn/J+EycF2+Mq4QBa/S5YgOwKaGggVQ6BMzk3OaigXmh7MXmcnC63vQWJxoYl9CcMe8/0BjN2EEktAAAAgQCyhIk+N9BFTrJr0Xdjed3PvHiMBabIgOBdCQMHsDCTW6WaEmuzED25o9Q9b/SIjoti4+L7ikPDe3Aye0ZOpVRnpwVxHnxRzCuXKbafSBTpAUDSPD4bwwgcvVqJViLhenbc1vc2Ea9yiSZ991u/ZO59WGFqjVsK8PGp1cmj2ZdEyQAAAIByFPv2gmmiEV9zGWewjjIGlFg8SJIOmU2lNj5h4gGnUO13zQtcpQ7+Y9VWPJgt2IrcQvGpm5rYUGS48cSIRglBV1mO8ga44yqn4INOWzZmYmDRoGPSlYKH2+kd8HnjOJH5aVxpRoRg54WwyNhnlg0TU0wGpF6vLqUf1L/JFEE0Wg==
-        # will put all file under this path
-        local_path: ./web-app
-        # files will copy to under remote_path
-        remote_path: /web-app
-          
+        username: 'root'
+        server: '${{ secrets.146.190.39.218 }}'
+        ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+        local_path: './web-app/build/*'
+        remote_path: '/root/web-app'
+        sftpArgs: '-o ConnectTimeout=5'
+        
