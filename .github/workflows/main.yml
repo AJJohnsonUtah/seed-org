@@ -8,11 +8,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Go to web-app dir
-      run: cd web-app
     - name: Setup Node
       uses: actions/setup-node@v4.0.2
     - name: Build Webapp
+      working-directory: ./web-app
       run: npm run build
 
     - name: SFTP Push
