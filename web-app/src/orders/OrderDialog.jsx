@@ -214,7 +214,7 @@ export default function OrderDialog({ open, orderToEdit, onSave, onDelete, onCan
     setShippingCost(orderToEdit?.shippingCost?.$numberDecimal || null);
     setOrderDate(orderToEdit?.orderDate || "");
     setOrderItems(orderToEdit?.orderItems || []);
-    setOrderAttachments(orderToEdit?.orderAttachments || null);
+    setOrderAttachments(orderToEdit?.orderAttachments || []);
     setNotes(orderToEdit?.notes || null);
   }, [open, orderToEdit]);
 
@@ -360,7 +360,7 @@ export default function OrderDialog({ open, orderToEdit, onSave, onDelete, onCan
               </Typography>
             </Grid>
             <Grid item xs={12}>
-              {orderAttachments.length === 0 && <Typography variant="body1">No attachments found</Typography>}
+              {orderAttachments?.length === 0 && <Typography variant="body1">No attachments found</Typography>}
             </Grid>
           </Grid>
         </Grid>
