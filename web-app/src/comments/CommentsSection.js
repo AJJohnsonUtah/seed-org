@@ -1,22 +1,45 @@
-import { AddAPhoto, AddComment, Close, Person } from "@mui/icons-material";
-import { Avatar, Button, FormHelperText, Grid, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import { AddAPhoto, AddComment, Close, Delete, Edit, MoreHoriz, Person, Save } from "@mui/icons-material";
+import {
+  Avatar,
+  Button,
+  CircularProgress,
+  FormHelperText,
+  Grid,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Paper,
+  Skeleton,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import moment from "moment";
 import React from "react";
 import { MyTextField } from "../common/components/MyTextField";
+
+export function displayError(e) {
+  alert(e.message);
+  console.error(e);
+}
 
 export function EditableComment({ comment, onSaveChanges, getSrcForAttachment, onCancel }) {
   const [commentContent, setCommentContent] = React.useState(comment?.content || "");
   const [attachments, setAttachments] = React.useState(comment?.attachments || []);
   const [inputImageValue, setInputImageValue] = React.useState("");
+  const [saving, setSaving] = React.useState(false);
   function resetComment() {
     setCommentContent(comment?.content || "");
     setAttachments(comment?.attachments || []);
     setInputImageValue("");
+    setSaving(false);
   }
 
   function cancelEditing() {
     resetComment();
     onCancel();
+    setSaving(false);
   }
   return (
     <form
@@ -27,25 +50,25 @@ export function EditableComment({ comment, onSaveChanges, getSrcForAttachment, o
         if (comment?._id) {
           commentToSave._id = comment._id;
         }
-        onSaveChanges(commentToSave, attachments).then(() => {
-          resetComment();
-        });
+        setSaving(true);
+        onSaveChanges(commentToSave, attachments)
+          .then(() => {
+            resetComment();
+          })
+          .catch(displayError)
+          .finally(() => setSaving(false));
       }}
     >
       <Grid container spacing={2}>
-        <Grid item>
+        <Grid item flexShrink={1}>
           <Avatar>
             <Person />
           </Avatar>
         </Grid>
-        <Grid item>
-          <Grid
-            container
-            spacing={1}
-            style={{ backgroundColor: "#DEDEFE", width: "fit-content", padding: 2, borderRadius: 4 }}
-          >
+        <Grid item flexGrow={1}>
+          <Grid container spacing={1} style={{ backgroundColor: "#DEDEFE", padding: 2, borderRadius: 4 }}>
             <Grid item style={{ position: "relative" }} container>
-              <Grid item>
+              <Grid item xs={12}>
                 <Typography variant="subtitle2">{comment?.user?.displayName || "AJ Johnson"}</Typography>
 
                 <MyTextField
@@ -55,7 +78,7 @@ export function EditableComment({ comment, onSaveChanges, getSrcForAttachment, o
                   multiline
                   required
                   size="small"
-                  style={{ minWidth: 500 }}
+                  fullWidth
                 />
               </Grid>
               {onCancel && (
@@ -103,7 +126,20 @@ export function EditableComment({ comment, onSaveChanges, getSrcForAttachment, o
                 />
               </Grid>
               <Grid item>
-                <Button type="submit">Save</Button>
+                <Button
+                  type="submit"
+                  loading={saving}
+                  startIcon={
+                    saving ? (
+                      <CircularProgress size="small" style={{ height: 16, width: 16 }} color="inherit" />
+                    ) : (
+                      <Save />
+                    )
+                  }
+                  disabled={Boolean(saving)}
+                >
+                  Save
+                </Button>
               </Grid>
             </Grid>
           </Grid>
@@ -114,21 +150,79 @@ export function EditableComment({ comment, onSaveChanges, getSrcForAttachment, o
 }
 
 export function CommentSummary({ comment, onClickEdit, onDelete, getSrcForAttachment }) {
+  const [menuAnchorEl, setMenuAnchorEl] = React.useState(null);
+  const commentMenuOpen = Boolean(menuAnchorEl);
   return (
     <Grid container spacing={2} alignItems="start">
-      <Grid item>
+      <Grid item flexShrink={1}>
         <Avatar>
           <Person />
         </Avatar>
       </Grid>
-      <Grid item xs={11}>
-        <Grid
-          container
-          spacing={1}
-          style={{ backgroundColor: "#DEDEFE", width: "fit-content", padding: 2, borderRadius: 4 }}
-        >
+      <Grid item flexGrow={1} style={{ width: "calc(100% - 56px)" }}>
+        <Grid container spacing={1} style={{ backgroundColor: "#DEDEFE", padding: 2, borderRadius: 4 }}>
           <Grid item xs={12}>
-            <Typography variant="subtitle2">{comment.user?.displayName}</Typography>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item>
+                <Typography variant="subtitle2">{comment.user?.displayName}</Typography>
+              </Grid>
+              <Grid item>
+                <Tooltip title={moment(comment.createdAt).format("LLL")}>
+                  <FormHelperText>
+                    {moment(comment.createdAt).fromNow()} {comment.createdAt !== comment.updatedAt && "(edited)"}
+                  </FormHelperText>
+                </Tooltip>
+              </Grid>
+              <Grid item flexGrow={1} />
+              <Grid item>
+                <IconButton
+                  size="small"
+                  aria-label="comment actions"
+                  id={"comment-menu-btn-" + comment._id}
+                  aria-controls={commentMenuOpen ? "comment-menu-" + comment._id : undefined}
+                  aria-expanded={commentMenuOpen ? "true" : undefined}
+                  onClick={(e) => setMenuAnchorEl(e.currentTarget)}
+                >
+                  <MoreHoriz />
+                </IconButton>
+                <Menu
+                  id="long-menu"
+                  MenuListProps={{
+                    "aria-labelledby": "long-button",
+                  }}
+                  anchorEl={menuAnchorEl}
+                  open={commentMenuOpen}
+                  onClose={() => setMenuAnchorEl(null)}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                >
+                  <MenuItem onClick={onClickEdit}>
+                    <ListItemIcon>
+                      <Edit />
+                    </ListItemIcon>
+                    <ListItemText>Edit</ListItemText>
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to delete this comment?")) {
+                        onDelete();
+                      }
+                    }}
+                  >
+                    <ListItemIcon>
+                      <Delete />
+                    </ListItemIcon>
+                    <ListItemText>Delete</ListItemText>
+                  </MenuItem>
+                </Menu>
+              </Grid>
+            </Grid>
             <Typography variant="body2">{comment.content}</Typography>
           </Grid>
           <Grid item xs={12} container spacing={2} alignItems="center">
@@ -147,32 +241,6 @@ export function CommentSummary({ comment, onClickEdit, onDelete, getSrcForAttach
                 </Paper>
               </Grid>
             ))}
-            <Grid item container spacing={3}>
-              <Grid item>
-                <Tooltip title={moment(comment.createdAt).format("LLL")}>
-                  <FormHelperText>
-                    {moment(comment.createdAt).fromNow()} {comment.createdAt !== comment.updatedAt && "(edited)"}
-                  </FormHelperText>
-                </Tooltip>
-              </Grid>
-              <Grid item>
-                <Button size="small" onClick={onClickEdit}>
-                  Edit
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  size="small"
-                  onClick={() => {
-                    if (window.confirm("Are you sure you want to delete this comment?")) {
-                      onDelete();
-                    }
-                  }}
-                >
-                  Delete
-                </Button>
-              </Grid>
-            </Grid>
           </Grid>
         </Grid>
       </Grid>
@@ -184,6 +252,7 @@ export default function CommentsSection({ baseId, commentService }) {
   const [comments, setComments] = React.useState(null);
   const [commentIdxUnderEdit, setCommentIdxUnderEdit] = React.useState(null);
   const [showNewComment, setShowNewComment] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
 
   const getComments = React.useCallback(() => {
     return commentService.getComments(baseId);
@@ -214,7 +283,10 @@ export default function CommentsSection({ baseId, commentService }) {
   );
 
   React.useEffect(() => {
-    getComments().then((baseWithComments) => setComments(baseWithComments.comments));
+    getComments().then((baseWithComments) => {
+      setComments(baseWithComments.comments);
+      setLoading(false);
+    });
   }, [getComments]);
 
   function addAttachmentsToComment(comment, attachments) {
@@ -234,19 +306,23 @@ export default function CommentsSection({ baseId, commentService }) {
               <EditableComment
                 comment={comment}
                 onSaveChanges={(commentToSave, attachments) => {
-                  return editComment(commentToSave).then((savedBase) => {
-                    return addAttachmentsToComment(comment, attachments).then((updatedBases) => {
-                      if (updatedBases.length) {
-                        comments[i] = updatedBases[updatedBases.length - 1].comments.find(
-                          (c) => c._id === commentToSave._id
-                        );
-                      } else {
-                        comments[i] = savedBase.comments.find((c) => c._id === commentToSave._id);
-                      }
-                      setComments([...comments]);
-                      setCommentIdxUnderEdit(null);
-                    });
-                  });
+                  return editComment(commentToSave)
+                    .then((savedBase) => {
+                      return addAttachmentsToComment(comment, attachments)
+                        .then((updatedBases) => {
+                          if (updatedBases.length) {
+                            comments[i] = updatedBases[updatedBases.length - 1].comments.find(
+                              (c) => c._id === commentToSave._id
+                            );
+                          } else {
+                            comments[i] = savedBase.comments.find((c) => c._id === commentToSave._id);
+                          }
+                          setComments([...comments]);
+                          setCommentIdxUnderEdit(null);
+                        })
+                        .catch((e) => displayError(e, "addAttachmentsToComment"));
+                    })
+                    .catch((e) => displayError(e, "editComment"));
                 }}
                 getSrcForAttachment={getSrcForAttachment}
                 onCancel={() => setCommentIdxUnderEdit(null)}
@@ -256,32 +332,50 @@ export default function CommentsSection({ baseId, commentService }) {
                 comment={comment}
                 onClickEdit={() => setCommentIdxUnderEdit(i)}
                 onDelete={() => {
-                  return deleteComment(comment._id).then(() => {
-                    comments.splice(i, 1);
-                    setComments([...comments]);
-                  });
+                  return deleteComment(comment._id)
+                    .then(() => {
+                      comments.splice(i, 1);
+                      setComments([...comments]);
+                    })
+                    .catch((e) => displayError(e, "deleteComment"));
                 }}
                 getSrcForAttachment={getSrcForAttachment}
               />
             )}
           </Grid>
         ))}
-      <Grid item>
+      {!comments && loading && (
+        <Grid item xs={12}>
+          <Grid container spacing={1}>
+            <Grid item flexShrink={1}>
+              <Skeleton variant="circular" style={{ width: 40, height: 40 }} />
+            </Grid>
+            <Grid item flexGrow={1}>
+              <Skeleton variant="rectangular" style={{ width: "100%", height: 50 }} />
+            </Grid>
+          </Grid>
+        </Grid>
+      )}
+      <Grid item xs={12}>
         {showNewComment ? (
           <EditableComment
             onSaveChanges={(commentToAdd, attachments) => {
-              return addComment(commentToAdd).then((updatedBase) => {
-                let addedComment = updatedBase.comments[updatedBase.comments.length - 1];
-                return addAttachmentsToComment(addedComment, attachments).then((updatedBases) => {
-                  if (updatedBases.length) {
-                    // get final promise, should be the last uploaded attachment / most up to date version
-                    let updatedComments = updatedBases[updatedBases.length - 1].comments;
-                    addedComment = updatedComments[updatedComments.length - 1];
-                  }
-                  setComments([...comments, addedComment]);
-                  setShowNewComment(false);
-                });
-              });
+              return addComment(commentToAdd)
+                .then((updatedBase) => {
+                  let addedComment = updatedBase.comments[updatedBase.comments.length - 1];
+                  return addAttachmentsToComment(addedComment, attachments)
+                    .then((updatedBases) => {
+                      if (updatedBases.length) {
+                        // get final promise, should be the last uploaded attachment / most up to date version
+                        let updatedComments = updatedBases[updatedBases.length - 1].comments;
+                        addedComment = updatedComments[updatedComments.length - 1];
+                      }
+                      setComments([...comments, addedComment]);
+                      setShowNewComment(false);
+                    })
+                    .catch((e) => displayError(e, "addAttachmentsToComment - new comment"));
+                })
+                .catch((e) => displayError(e, "addComment - new comment"));
             }}
             onCancel={() => setShowNewComment(false)}
           />
