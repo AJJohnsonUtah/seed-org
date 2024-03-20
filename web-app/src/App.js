@@ -71,7 +71,7 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <div className="App" style={{ backgroundColor: "#CEEEFE" }}>
+    <div className="App" style={{ backgroundColor: "#CEEEFE", height: '100%' }}>
       <ThemeProvider theme={theme}>
         <RouterProvider router={router} />
       </ThemeProvider>

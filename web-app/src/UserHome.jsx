@@ -98,7 +98,7 @@ export default function UserHome() {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", height: "100%" }}>
       <CssBaseline />
       <AppBar position="fixed" open={open}>
         <Toolbar>
@@ -119,7 +119,7 @@ export default function UserHome() {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Drawer variant="permanent" open={open}>
+      <Drawer variant="permanent" open={open} style={{ height: "100%" }}>
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -133,7 +133,7 @@ export default function UserHome() {
             { linkTo: "/schedule", displayText: "Planting Calendar", icon: <CalendarMonth /> },
             { linkTo: "/plantings", displayText: "Plantings", icon: <Yard /> },
             { linkTo: "/orders", displayText: "Orders", icon: <MonetizationOn /> },
-          ].map((navItem, index) => (
+          ].map((navItem) => (
             <ListItem key={navItem.displayText} disablePadding sx={{ display: "block" }}>
               <ListItemButton
                 sx={{
@@ -143,6 +143,7 @@ export default function UserHome() {
                 }}
                 LinkComponent={Link}
                 to={navItem.linkTo}
+                aria-label={navItem.displayText}
               >
                 <ListItemIcon
                   sx={{
@@ -206,7 +207,7 @@ export default function UserHome() {
           </ListItem>
         </List>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, overflow: "auto" }}>
         <DrawerHeader />
         <Outlet />
       </Box>
