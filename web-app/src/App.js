@@ -6,7 +6,7 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import FloralMixCalendarDisplay from "./FloralMixCalendar/FloralMixCalendarDisplay";
 import DragDropPlantingContextProvider from "./PlantLayout/DragDropPlantingContext";
-import FlowerBoyLayout from "./PlantLayout/FlowerBoyLayout";
+import Plantings from "./PlantLayout/Plantings";
 import SeedList from "./SeedInventory/SeedList";
 import UserHome from "./UserHome";
 import AuthContextProvider from "./common/context/AuthContext";
@@ -48,7 +48,7 @@ const router = createBrowserRouter([
         path: "/layout",
         element: (
           <DragDropPlantingContextProvider>
-            <FlowerBoyLayout />
+            <Plantings />
           </DragDropPlantingContextProvider>
         ),
       },

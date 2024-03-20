@@ -32,10 +32,15 @@ export default function FlowerBoyLayout() {
 
   return (
     <div>
-      <Typography variant="h6">{rowsNeeded.toFixed(2)} rows needed</Typography>
+      <Typography variant="h5">{rowsNeeded.toFixed(2)} rows needed</Typography>
       <List dense>
-        {plantings.map((planting) => (
-          <PlantingSummary planting={planting} key={planting._id} />
+        {plantings.map((planting, i) => (
+          <>
+            {(i === 0 || planting.seedDate !== plantings[i - 1].seedDate) && (
+              <Typography variant="h6">{planting.seedDate}</Typography>
+            )}
+            <PlantingSummary planting={planting} key={planting._id} />
+          </>
         ))}
       </List>
 

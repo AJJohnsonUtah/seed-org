@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import React from "react";
 import { getBgColorString } from "../FloralMixCalendar/PlantCalendarRow";
 import { useDragDropPlantingContext } from "./DragDropPlantingContext";
@@ -16,8 +16,6 @@ export default function DraggablePlanting({ planting, onRelocate }) {
       onDragOver={(e) => e.preventDefault()}
       onDragEnd={(e) => {
         setTimeout(() => setCurrentlyDraggedPlanting(null));
-        // draggablePlantings.splice(i, 0, currentlyDraggedItem);
-        // setDraggablePlantings([...draggablePlantings]);
       }}
       key={planting._id}
       style={{
@@ -26,7 +24,24 @@ export default function DraggablePlanting({ planting, onRelocate }) {
         opacity: currentlyDraggedPlanting?._id === planting._id ? 0.3 : 1,
         width: planting.inchesNeeded * 2,
         cursor: "grab",
+        textAlign: "center",
+        padding: 6,
       }}
-    />
+    >
+      <Typography
+        style={{
+          maxWidth: "100%",
+          backgroundColor: "rgba(255, 255, 255, 0.6)",
+          textAlign: "center",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          width: "fit-content",
+          margin: "auto",
+        }}
+      >
+        {planting.seedDetails.name}
+      </Typography>
+    </Box>
   );
 }

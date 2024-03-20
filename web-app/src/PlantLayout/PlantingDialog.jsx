@@ -173,7 +173,7 @@ export default function PlantingDialog({ open, planting, onSaveChanges, onCancel
                 </Grid>
               </Grid>
             </Grid>
-            <Grid container item spacing={2} xs={12} md={3}>
+            <Grid container item spacing={2} xs={4} md={3}>
               <Grid item xs={12}>
                 <Card style={{ position: "relative", width: "100%" }}>
                   {seedDetails?.picUrl && (

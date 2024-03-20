@@ -1,13 +1,39 @@
-import { ListItemButton, ListItemText } from "@mui/material";
+import { Icon, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import React from "react";
 import { usePlantingContext } from "../common/context/PlantingDialogContext";
+import { FillerIcon, FocalFlowerIcon, SecondaryFlowerIcon } from "./../common/icons/TypeOfPlantIcons";
 import { getRowWidthForTargetPlantCount } from "./LayoutCalculator";
+export function TypeOfPlantIcon({ typeOfPlant, ...props }) {
+  let icon;
+  switch (typeOfPlant) {
+    case "filler":
+      icon = <FillerIcon />;
+      break;
+    case "secondary":
+      icon = <SecondaryFlowerIcon />;
+      break;
+    case "primary":
+    default:
+      icon = <FocalFlowerIcon />;
+      break;
+  }
+  return <Icon {...props}>{icon}</Icon>;
+}
 
 export default function PlantingSummary({ planting }) {
   const { editPlanting } = usePlantingContext();
 
   return (
-    <ListItemButton onClick={() => editPlanting(planting)}>
+    <ListItemButton
+      onClick={() => editPlanting(planting)}
+      style={{ display: "inline-flex", border: "1px solid #CCC", borderRadius: 8, margin: 4, backgroundColor: "#FFF" }}
+    >
+      <ListItemIcon style={{ minWidth: 40 }}>
+        <TypeOfPlantIcon
+          typeOfPlant={planting.seedDetails.typeOfPlant}
+          style={{ color: planting.seedDetails.plantColors?.[0] }}
+        />
+      </ListItemIcon>
       <ListItemText
         primary={planting.seedDetails?.name}
         secondary={
