@@ -29,6 +29,11 @@ export function EditableComment({ comment, onSaveChanges, getSrcForAttachment, o
   const [attachments, setAttachments] = React.useState(comment?.attachments || []);
   const [inputImageValue, setInputImageValue] = React.useState("");
   const [saving, setSaving] = React.useState(false);
+  const saveCommentButtonId = "save-comment-btn" + (comment?._id ? `-${comment._id}` : "");
+
+  React.useEffect(() => {
+    document.getElementById(saveCommentButtonId).scrollIntoView({ behavior: "smooth", block: "end", inline: "end" });
+  }, [saveCommentButtonId, attachments]);
   function resetComment() {
     setCommentContent(comment?.content || "");
     setAttachments(comment?.attachments || []);
@@ -122,11 +127,14 @@ export function EditableComment({ comment, onSaveChanges, getSrcForAttachment, o
                   accept="image"
                   value={inputImageValue}
                   hidden
-                  onChange={(e) => setAttachments([...attachments, e.target.files[0]])}
+                  onChange={(e) => {
+                    setAttachments([...attachments, e.target.files[0]]);
+                  }}
                 />
               </Grid>
               <Grid item>
                 <Button
+                  id={saveCommentButtonId}
                   type="submit"
                   startIcon={
                     saving ? (
@@ -163,7 +171,7 @@ export function CommentSummary({ comment, onClickEdit, onDelete, getSrcForAttach
           <Grid item xs={12}>
             <Grid container spacing={2} alignItems="center">
               <Grid item>
-                <Typography variant="subtitle2">{comment.user?.displayName}</Typography>
+                <Typography variant="subtitle2">{comment.user?.displayName || "AJ Johnson"}</Typography>
               </Grid>
               <Grid item>
                 <Tooltip title={moment(comment.createdAt).format("LLL")}>
@@ -355,6 +363,7 @@ export default function CommentsSection({ baseId, commentService }) {
           </Grid>
         </Grid>
       )}
+
       <Grid item xs={12}>
         {showNewComment ? (
           <EditableComment
