@@ -128,7 +128,6 @@ export function EditableComment({ comment, onSaveChanges, getSrcForAttachment, o
               <Grid item>
                 <Button
                   type="submit"
-                  loading={saving}
                   startIcon={
                     saving ? (
                       <CircularProgress size="small" style={{ height: 16, width: 16 }} color="inherit" />
