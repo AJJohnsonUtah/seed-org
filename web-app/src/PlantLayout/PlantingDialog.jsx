@@ -93,7 +93,7 @@ export default function PlantingDialog({ open, planting, onSaveChanges, onCancel
             savePlanting();
           }}
         >
-          <Grid container spacing={2}>
+          <Grid container spacing={2} sx={{ mt: -1 }}>
             <Grid container spacing={2} item xs={12} md={9}>
               <Grid item xs={12}>
                 <Autocomplete

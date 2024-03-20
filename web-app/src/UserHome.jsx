@@ -1,4 +1,4 @@
-import { CalendarMonth, Grid3x3, Inventory, MonetizationOn, Person, Settings } from "@mui/icons-material";
+import { CalendarMonth, Dashboard, Inventory, MonetizationOn, Person, Settings, Yard } from "@mui/icons-material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -128,9 +128,10 @@ export default function UserHome() {
         <Divider />
         <List>
           {[
+            { linkTo: "/dashboard", displayText: "Task Dashboard", icon: <Dashboard /> },
             { linkTo: "/inventory", displayText: "Seed Inventory", icon: <Inventory /> },
             { linkTo: "/schedule", displayText: "Planting Calendar", icon: <CalendarMonth /> },
-            { linkTo: "/layout", displayText: "Layout", icon: <Grid3x3 /> },
+            { linkTo: "/plantings", displayText: "Plantings", icon: <Yard /> },
             { linkTo: "/orders", displayText: "Orders", icon: <MonetizationOn /> },
           ].map((navItem, index) => (
             <ListItem key={navItem.displayText} disablePadding sx={{ display: "block" }}>

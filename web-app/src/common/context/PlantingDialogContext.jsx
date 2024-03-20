@@ -31,8 +31,8 @@ export default function PlantingDialogContextProvider({ children }) {
     });
   }, []);
 
-  function addNewPlanting() {
-    setCurrentPlanting({ ...defaultPlanting });
+  function addNewPlanting(initialValues) {
+    setCurrentPlanting({ ...defaultPlanting, ...initialValues });
   }
 
   function savePlantingChanges(plantingToSave) {

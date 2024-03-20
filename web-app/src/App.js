@@ -8,10 +8,11 @@ import FloralMixCalendarDisplay from "./FloralMixCalendar/FloralMixCalendarDispl
 import DragDropPlantingContextProvider from "./PlantLayout/DragDropPlantingContext";
 import Plantings from "./PlantLayout/Plantings";
 import SeedList from "./SeedInventory/SeedList";
+import TaskDashboard from "./TaskDashboard/TaskDashboard";
 import UserHome from "./UserHome";
 import AuthContextProvider from "./common/context/AuthContext";
 import PlantingDialogContextProvider from "./common/context/PlantingDialogContext";
-import Orders from './orders/Orders';
+import Orders from "./orders/Orders";
 
 const theme = createTheme({
   typography: {
@@ -37,6 +38,14 @@ const router = createBrowserRouter([
     ),
     children: [
       {
+        path: "/",
+        element: <TaskDashboard />,
+      },
+      {
+        path: "/dashboard",
+        element: <TaskDashboard />,
+      },
+      {
         path: "/inventory",
         element: <SeedList />,
       },
@@ -45,7 +54,7 @@ const router = createBrowserRouter([
         element: <FloralMixCalendarDisplay />,
       },
       {
-        path: "/layout",
+        path: "/plantings",
         element: (
           <DragDropPlantingContextProvider>
             <Plantings />
@@ -54,9 +63,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/orders",
-        element: (
-            <Orders />
-        ),
+        element: <Orders />,
       },
     ],
   },
