@@ -64,7 +64,14 @@ export default function SeedList() {
           </Grid>
         ))}
       </Grid>
-      {<SeedDialog open={showNewSeed} seed={seedToAdd} onSaveChanges={addSeed} onCancel={() => setShowNewSeed(false)} />}
+      {
+        <SeedDialog
+          open={showNewSeed}
+          seed={seedToAdd}
+          onSaveChanges={addSeed}
+          onCancel={() => setShowNewSeed(false)}
+        />
+      }
       {!showNewSeed && (
         <Fab
           type="button"

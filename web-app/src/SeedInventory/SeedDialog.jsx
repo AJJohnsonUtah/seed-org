@@ -24,6 +24,13 @@ export function ColorChip({ color, onDelete }) {
   return <Chip style={{ backgroundColor: color }} onDelete={onDelete} />;
 }
 
+export const PLANT_SUPPORT_OPTIONS = [
+  { value: "VerticalTrellising", name: "Vertical Trellising" },
+  { value: "HorizontalNetting", name: "Horizontal Netting" },
+  { value: "Corralling", name: "Corralling" },
+  { value: "Staking", name: "Staking" },
+];
+
 export default function SeedDialog({ open, seed, onSaveChanges, onCancel, onDelete }) {
   const [name, setName] = useState(seed?.name);
   const [seedsPerPacket, setSeedsPerPacket] = useState(seed?.seedsPerPacket);
@@ -40,6 +47,7 @@ export default function SeedDialog({ open, seed, onSaveChanges, onCancel, onDele
   const [storeUrl, setStoreUrl] = useState(seed?.storeUrl);
   const [typeOfPlant, setTypeOfPlant] = useState(seed?.typeOfPlant);
   const [plantColors, setPlantColors] = useState(seed?.plantColors || []);
+  const [supportNeeded, setSupportNeeded] = useState(seed?.supportNeeded || []);
 
   function deleteSeedDetails() {
     if (window.confirm("Are you sure you want to delete " + name + " [_id: " + seed._id + "]?")) {
@@ -70,6 +78,7 @@ export default function SeedDialog({ open, seed, onSaveChanges, onCancel, onDele
       storeUrl,
       typeOfPlant,
       plantColors,
+      supportNeeded,
     };
     SeedInventoryService.upsertSeedDetails(upsertedSeedDetails)
       .then(onSaveChanges)
@@ -181,6 +190,28 @@ export default function SeedDialog({ open, seed, onSaveChanges, onCancel, onDele
                     multiline
                     rows={2}
                   />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="support-needed-label">Support Needed</InputLabel>
+                    <Select
+                      labelId="support-needed-label"
+                      id="support-needed"
+                      value={supportNeeded}
+                      label="Support Neeted"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSupportNeeded(typeof val === "string" ? val.split(",") : val);
+                      }}
+                      multiple
+                    >
+                      {PLANT_SUPPORT_OPTIONS.map((supportOpt) => (
+                        <MenuItem value={supportOpt.value} key={supportOpt.value}>
+                          {supportOpt.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <MyTextField label="Pic URL" value={picUrl} setValue={setPicUrl} fullWidth />

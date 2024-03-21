@@ -24,7 +24,7 @@ export default function PlantingDialog({ open, planting, onSaveChanges, onCancel
   const [allSeeds, setAllSeeds] = React.useState([]);
 
   React.useEffect(() => {
-    SeedInventoryService.loadSeeds().then((s) => setAllSeeds(s));
+    SeedInventoryService.loadSeeds().then((s) => setAllSeeds([...s]));
   }, []);
 
   const [seedDetailsInputValue, setSeedDetailsInputValue] = useState(planting?.seedDetails?.name || "");

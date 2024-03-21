@@ -5,6 +5,7 @@ import "@fontsource/roboto/700.css";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import FloralMixCalendarDisplay from "./FloralMixCalendar/FloralMixCalendarDisplay";
+import LoginPage from "./Login/LoginPage";
 import DragDropPlantingContextProvider from "./PlantLayout/DragDropPlantingContext";
 import Plantings from "./PlantLayout/Plantings";
 import SeedList from "./SeedInventory/SeedList";
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
       </AuthContextProvider>
     ),
     children: [
+      {
+        path: "/login",
+        element: <LoginPage />,
+      },
       {
         path: "/",
         element: <TaskDashboard />,
@@ -71,7 +76,7 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <div className="App" style={{ backgroundColor: "#CEEEFE", height: '100%' }}>
+    <div className="App" style={{ backgroundColor: "#CEEEFE", height: "100%" }}>
       <ThemeProvider theme={theme}>
         <RouterProvider router={router} />
       </ThemeProvider>

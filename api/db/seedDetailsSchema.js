@@ -19,6 +19,7 @@ const SeedDetailsSchema = new Schema(
     storeUrl: String,
     typeOfPlant: String,
     plantColors: [String],
+    supportNeeded: [String],
   },
   { timestamps: true }
 );

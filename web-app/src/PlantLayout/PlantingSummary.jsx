@@ -28,10 +28,11 @@ export default function PlantingSummary({ planting }) {
       onClick={() => editPlanting(planting)}
       style={{ display: "inline-flex", border: "1px solid #CCC", borderRadius: 8, margin: 4, backgroundColor: "#FFF" }}
     >
-      <ListItemIcon style={{ minWidth: 40 }}>
-        <TypeOfPlantIcon
-          typeOfPlant={planting.seedDetails.typeOfPlant}
-          style={{ color: planting.seedDetails.plantColors?.[0] }}
+      <ListItemIcon>
+        <img
+          src={planting.seedDetails.picUrl}
+          alt={planting.seedDetails.name}
+          style={{ maxWidth: 40, borderRadius: 20 }}
         />
       </ListItemIcon>
       <ListItemText

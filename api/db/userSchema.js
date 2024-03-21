@@ -6,9 +6,10 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema(
   {
     email: String,
-    password: String,
+    hashedPassword: String,
     profilePic: FileAttachmentSchema,
     displayName: String,
+    accountStatus: String,
   },
   { timestamps: true }
 );

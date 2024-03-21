@@ -12,7 +12,8 @@ var usersRouter = require("./routes/users");
 var seedDetailsRouter = require("./routes/seedDetails");
 var plantingsRouter = require("./routes/plantings");
 var ordersRouter = require("./routes/orders");
-
+var authRouter = require("./routes/auth");
+var { verifyToken } = require("./middleware/verifyToken");
 var app = express();
 
 app.use(cors());
@@ -21,6 +22,12 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+// /auth endpoints don't require authentication
+app.use("/auth", authRouter);
+
+// All endpoints after THIS do require auth
+app.use(verifyToken);
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);

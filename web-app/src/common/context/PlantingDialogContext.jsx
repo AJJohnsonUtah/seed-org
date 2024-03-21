@@ -36,16 +36,19 @@ export default function PlantingDialogContextProvider({ children }) {
   }
 
   function savePlantingChanges(plantingToSave) {
+    const updatedPlantings = [...plantings];
+
     if (currentPlanting._id) {
       // Edit
-      const updatedPlantings = [...plantings];
       const indexOfCurPlanting = plantings.indexOf(currentPlanting);
       updatedPlantings[indexOfCurPlanting] = plantingToSave;
-      setPlantings(updatedPlantings);
     } else {
       // Add
-      setPlantings([...plantings, plantingToSave]);
+      updatedPlantings.push(plantingToSave);
     }
+    updatedPlantings.sort((a, b) => a.seedDate.localeCompare(b.seedDate));
+
+    setPlantings(updatedPlantings);
     setCurrentPlanting(null);
   }
 
