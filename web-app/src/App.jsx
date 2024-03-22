@@ -13,9 +13,21 @@ import TaskDashboard from "./TaskDashboard/TaskDashboard";
 import UserHome from "./UserHome";
 import AuthContextProvider from "./common/context/AuthContext";
 import PlantingDialogContextProvider from "./common/context/PlantingDialogContext";
+import { setupAxiosDefaults } from "./config/AxiosConfig";
 import Orders from "./orders/Orders";
 
+setupAxiosDefaults();
+
 const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#2196f3", // Blue color for primary
+    },
+    secondary: {
+      main: "#4caf50", // Green color for secondary
+    },
+    // You can add more colors or customize other palette options as needed
+  },
   typography: {
     h1: {
       fontSize: 36,
@@ -41,6 +53,10 @@ const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginPage />,
+      },
+      {
+        path: "/verify-email/:verificationCode/:userId",
+        element: <VerifyEmailPage />,
       },
       {
         path: "/",

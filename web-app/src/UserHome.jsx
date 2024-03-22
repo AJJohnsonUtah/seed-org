@@ -2,6 +2,7 @@ import { CalendarMonth, Dashboard, Inventory, MonetizationOn, Person, Settings, 
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MenuIcon from "@mui/icons-material/Menu";
+import { Menu, MenuItem } from "@mui/material";
 import MuiAppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -29,6 +30,70 @@ const openedMixin = (theme) => ({
   }),
   overflowX: "hidden",
 });
+
+export function ProfileMenu({ drawerOpen }) {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const { currentUser, logOut } = useAuthContext();
+
+  function handleClick(e) {
+    setAnchorEl(e.currentTarget);
+  }
+
+  function onClose() {
+    setAnchorEl(null);
+  }
+
+  return (
+    <ListItem disablePadding sx={{ display: "block" }}>
+      <ListItemButton
+        sx={{
+          minHeight: 48,
+          justifyContent: drawerOpen ? "initial" : "center",
+          px: 2.5,
+        }}
+        onClick={handleClick}
+      >
+        <ListItemIcon
+          sx={{
+            minWidth: 0,
+            mr: drawerOpen ? 3 : "auto",
+            justifyContent: "center",
+          }}
+        >
+          {<Person />}
+        </ListItemIcon>
+        <ListItemText primary={"Profile"} sx={{ opacity: drawerOpen ? 1 : 0 }} />
+      </ListItemButton>
+      <Menu
+        id="profile-menu"
+        MenuListProps={{
+          "aria-labelledby": "profile-menu-btn-",
+        }}
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={onClose}
+        anchorOrigin={{
+          vertical: "center",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "center",
+          horizontal: "left",
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            setAnchorEl(null);
+            logOut();
+          }}
+        >
+          Sign Out
+        </MenuItem>
+        <MenuItem>Profile</MenuItem>
+      </Menu>
+    </ListItem>
+  );
+}
 
 const closedMixin = (theme) => ({
   transition: theme.transitions.create("width", {
@@ -161,28 +226,7 @@ export default function UserHome() {
         </List>
         <Box sx={{ flexGrow: 1 }} />
         <List>
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              sx={{
-                minHeight: 48,
-                justifyContent: open ? "initial" : "center",
-                px: 2.5,
-              }}
-              LinkComponent={Link}
-              to={"/profile"}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : "auto",
-                  justifyContent: "center",
-                }}
-              >
-                {<Person />}
-              </ListItemIcon>
-              <ListItemText primary={"Profile"} sx={{ opacity: open ? 1 : 0 }} />
-            </ListItemButton>
-          </ListItem>
+          <ProfileMenu drawerOpen={open} />
           <ListItem disablePadding sx={{ display: "block" }}>
             <ListItemButton
               sx={{

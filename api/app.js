@@ -16,7 +16,12 @@ var authRouter = require("./routes/auth");
 var { verifyToken } = require("./middleware/verifyToken");
 var app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.NODE_ENV === "production" ? /flowerboy.app$/ : /(localhost)|(192.168.86.68)/,
+    credentials: true,
+  })
+);
 app.use(logger("dev"));
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));

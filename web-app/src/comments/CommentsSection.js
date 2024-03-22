@@ -193,9 +193,9 @@ export function CommentSummary({ comment, onClickEdit, onDelete, getSrcForAttach
                   <MoreHoriz />
                 </IconButton>
                 <Menu
-                  id="long-menu"
+                  id={"comment-menu-" + comment._id}
                   MenuListProps={{
-                    "aria-labelledby": "long-button",
+                    "aria-labelledby": "comment-menu-btn-" + comment._id,
                   }}
                   anchorEl={menuAnchorEl}
                   open={commentMenuOpen}

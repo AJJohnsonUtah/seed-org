@@ -1,8 +1,9 @@
+const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET || "[{Q#2'[q]-0i";
 
 function verifyToken(req, res, next) {
-  // Get token from request headers, cookies, or wherever you're sending it from the client
-  const token = req.headers.authorization?.split(" ")[1] || req.cookies.token;
+  // Get token from cookies, or wherever you're sending it from the client
+  const token = req.cookies.ACCESS_TOKEN;
 
   if (!token) {
     return res.status(401).json({ error: "Unauthorized: Missing token" });

@@ -9,7 +9,11 @@ const UserSchema = new Schema(
     hashedPassword: String,
     profilePic: FileAttachmentSchema,
     displayName: String,
-    accountStatus: String,
+    accountVerification: {
+      verified: Boolean,
+      emailSentDate: String,
+      verificationCode: String,
+    },
   },
   { timestamps: true }
 );
