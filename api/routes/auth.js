@@ -6,10 +6,9 @@ const jwt = require("jsonwebtoken");
 var express = require("express");
 var router = express.Router();
 var { JWT_SECRET } = require("./../middleware/verifyToken");
-
+const crypto = require("crypto");
 const RefreshTokenTtlMillis = 30 * 24 * 60 * 60 * 1000; // 30 days
 const AccessTokenTtlMillis = 60 * 60 * 1000; // 1 Hour
-
 const defaultTokenOptions = {
   httpOnly: true,
   sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
