@@ -66,7 +66,7 @@ async function addUserToOrganization(user, org) {
   }
   user.organizations.push(org);
 
-  const userWithOrgAdded = await user.save().populate("organizations.$.name");
+  const userWithOrgAdded = await user.save().then((u) => u.populate("organizations"));
 
   if (!org.members) {
     org.members = [];
@@ -91,6 +91,10 @@ async function loginAsUser(user, response) {
   sendNewAccessToken(user, response);
   sendNewRefreshToken(user, response);
   delete user["hashedPassword"];
+  const orgsToDisplay = user.organizations.map((o) => ({
+    _id: o._id,
+    name: o.name,
+  }));
   response.send({
     email: user.email,
     profilePic: user.profilePic,
@@ -98,7 +102,7 @@ async function loginAsUser(user, response) {
     accountVerification: {
       verified: user.accountVerification.verified,
     },
-    organizations: user.organizations,
+    organizations: orgsToDisplay,
   });
 }
 
@@ -116,7 +120,8 @@ async function sendNewAccessToken(user, res) {
 router.post("/login", async function (req, res) {
   const { email, password } = req.body;
   // Mock user data for demonstration (replace with actual database queries)
-  const foundUser = await UserModel.findOne({ email: email.toLocaleLowerCase() }).populate("organizations.$.name");
+  const foundUser = await UserModel.findOne({ email: email.toLocaleLowerCase() }).populate("organizations");
+  console.log(foundUser);
   // Check if the email exists and passwords match
   if (!foundUser || !(await bcrypt.compare(password, foundUser.hashedPassword))) {
     return res.status(401).json({ error: "Invalid email or password" });
@@ -166,7 +171,7 @@ router.post("/newUser", async function (req, res) {
 router.post("/verifyEmail", async function (req, res) {
   const { verificationCode, _id } = req.body;
 
-  let foundUser = await UserModel.findById(_id).populate("organizations.$.name");
+  let foundUser = await UserModel.findById(_id).populate("organizations");
 
   if (!foundUser) {
     return res.status(403).json({ error: "Forbidden: User not found" });

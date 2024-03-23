@@ -1,16 +1,8 @@
-import {
-  CalendarMonth,
-  Dashboard,
-  Inventory,
-  Logout,
-  MonetizationOn,
-  Person,
-  Yard
-} from "@mui/icons-material";
+import { CalendarMonth, Dashboard, Inventory, Logout, MonetizationOn, Person, Yard } from "@mui/icons-material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Container, Menu, MenuItem } from "@mui/material";
+import { Container, Menu, MenuItem, Paper } from "@mui/material";
 import MuiAppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -182,11 +174,13 @@ export default function UserHome() {
 
   if (currentUser && !currentUser?.accountVerification?.verified) {
     return (
-      <Container>
-        <Typography variant="h5">
-          Hey {currentUser.displayName}. It looks like your email hasn't been verified - check your email (
-          {currentUser.email}) for the verification link to get started!
-        </Typography>
+      <Container sx={{ mt: 8 }}>
+        <Paper elevation={4}>
+          <Typography variant="h5">
+            Hey {currentUser.displayName}. It looks like your email hasn't been verified - check your email (
+            {currentUser.email}) for the verification link to get started!
+          </Typography>
+        </Paper>
       </Container>
     );
   }
