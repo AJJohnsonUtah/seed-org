@@ -11,9 +11,11 @@ const UserSchema = new Schema(
     displayName: String,
     accountVerification: {
       verified: Boolean,
-      emailSentDate: String,
+      verificationDate: String, // UTC Date String
+      verificationCodeExpirationDate: String, // UTC Date String
       verificationCode: String,
     },
+    organizations: [{ type: Schema.Types.ObjectId, ref: "Organization" }],
   },
   { timestamps: true }
 );

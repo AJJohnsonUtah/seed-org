@@ -1,5 +1,6 @@
 const moment = require("moment");
 const { UserModel } = require("../db/userSchema");
+const { OrganizationModel } = require("../db/organizationSchema");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 var express = require("express");
@@ -20,7 +21,8 @@ async function sendVerificationEmail(user) {
 
   const accountVerification = {
     verified: false,
-    emailSentDate: moment().toISOString(),
+    // Expire after 1 day
+    verificationCodeExpirationDate: moment().add(1, "day").toISOString(),
     verificationCode,
   };
   user.accountVerification = accountVerification;
@@ -34,29 +36,45 @@ async function sendVerificationEmail(user) {
     port: 587,
     auth: {
       user: "no-reply@flowerboy.app",
-      pass: "5YIE6W12SXPxvpop7l4=",
+      pass: process.env.TITAN_MAIL_PASSWORD,
     },
   });
 
   const verificationUrl =
     process.env.NODE_ENV === "production"
-      ? "https://flowerboy.app/verify-email/" + user.accountVerification.verificationCode
-      : "http://192.168.86.68/verify-email/" + user.accountVerification.verificationCode;
+      ? "https://flowerboy.app/verify-email/" + user.accountVerification.verificationCode + "/" + user._id
+      : "http://192.168.86.68:3000/verify-email/" + user.accountVerification.verificationCode + "/" + user._id;
 
   var mailOptions = {
-    from: "no-reply@flowerboy.app",
+    from: '"Flower Boy" <no-reply@flowerboy.app>',
     to: user.email,
-    subject: "Flower Boy - Verification",
-    text: `<!DOCTYPE html>
-    <html lang="en"><p>Hey there ${user.displayName}!</p><br/><p>Click <a href="${verificationUrl}">HERE</a> to verify your email!</p></html>
+    subject: "Verify Your Email",
+    text: `Welcome to Flower Boy`,
+    html: `<!DOCTYPE html>
+    <html lang="en"><body><p>Hey there ${user.displayName}!</p><p>Click <a href="${verificationUrl}">HERE</a> to verify your email!</p>
+    <p>Let's get growing!</p></body></html>
     `,
   };
 
-  console.log("saved user: ", savedUser);
-
   const emailResult = await transporter.sendMail(mailOptions);
-  console.log("email results: ", emailResult);
   return savedUser;
+}
+
+async function addUserToOrganization(user, org) {
+  if (!user.organizations) {
+    user.organizations = [];
+  }
+  user.organizations.push(org);
+
+  const userWithOrgAdded = await user.save().populate("organizations.$.name");
+
+  if (!org.members) {
+    org.members = [];
+  }
+  org.members.push({ role: ["ADMIN"], user: userWithOrgAdded });
+
+  const orgWithUserAdded = await org.save();
+  return userWithOrgAdded;
 }
 
 async function sendNewRefreshToken(user, res) {
@@ -80,6 +98,7 @@ async function loginAsUser(user, response) {
     accountVerification: {
       verified: user.accountVerification.verified,
     },
+    organizations: user.organizations,
   });
 }
 
@@ -97,7 +116,7 @@ async function sendNewAccessToken(user, res) {
 router.post("/login", async function (req, res) {
   const { email, password } = req.body;
   // Mock user data for demonstration (replace with actual database queries)
-  const foundUser = await UserModel.findOne({ email: email.toLocaleLowerCase() });
+  const foundUser = await UserModel.findOne({ email: email.toLocaleLowerCase() }).populate("organizations.$.name");
   // Check if the email exists and passwords match
   if (!foundUser || !(await bcrypt.compare(password, foundUser.hashedPassword))) {
     return res.status(401).json({ error: "Invalid email or password" });
@@ -117,57 +136,62 @@ router.post("/newUser", async function (req, res) {
   if (foundUser && foundUser.accountVerification.verified) {
     return res.status(400).json({ error: "Account with this email already exists" });
   }
-
-  const userToSave = new UserModel({
-    email: email.toLocaleLowerCase(),
-    hashedPassword,
-    displayName,
-    accountVerification: {
-      verified: false,
-    },
-  });
+  const GULB_ORG = await OrganizationModel.findOne({});
+  let userToVerify;
 
   if (foundUser && !foundUser.accountVerification.verified) {
     // Resend email for existing account - mebbe they forgot about this or it expired. 🤷‍♀️
-    userToSave._id = _foundUser;
+    foundUser.hashedPassword = hashedPassword;
+    foundUser.displayName = displayName;
+    userToVerify = await foundUser.save();
+  } else {
+    const userToSave = new UserModel({
+      email: email.toLocaleLowerCase(),
+      hashedPassword,
+      displayName,
+      accountVerification: {
+        verified: false,
+      },
+    });
+    userToVerify = await userToSave.save();
   }
 
-  const createdUser = await userToSave.save();
-  await sendVerificationEmail(createdUser);
-  loginAsUser(createdUser, res);
+  const userWithOrg = await addUserToOrganization(userToVerify, GULB_ORG);
+
+  await sendVerificationEmail(userWithOrg);
+  loginAsUser(userWithOrg, res);
 });
 
 /* Verify user email */
 router.post("/verifyEmail", async function (req, res) {
-  const { verificationCode, userId } = req.body;
+  const { verificationCode, _id } = req.body;
 
-  const foundUser = await UserModel.findById(userId);
+  let foundUser = await UserModel.findById(_id).populate("organizations.$.name");
 
-  const curDate = moment()
-
-  if(foundUs)
-
-  if (foundUser && foundUser.accountVerification.verified) {
-    return res.status(400).json({ error: "Account with this email already exists" });
+  if (!foundUser) {
+    return res.status(403).json({ error: "Forbidden: User not found" });
   }
 
-  const userToSave = new UserModel({
-    email: email.toLocaleLowerCase(),
-    hashedPassword,
-    displayName,
-    accountVerification: {
-      verified: false,
-    },
-  });
+  const curDate = moment().toISOString();
 
-  if (foundUser && !foundUser.accountVerification.verified) {
-    // Resend email for existing account - mebbe they forgot about this or it expired. 🤷‍♀️
-    userToSave._id = _foundUser;
+  const codeExpired = foundUser.accountVerification.verificationCodeExpirationDate < curDate;
+  const codesMatch = verificationCode === foundUser.accountVerification.verificationCode;
+  if (codeExpired) {
+    return res.status(400).json({ error: "Verification code expired" });
+  }
+  if (!codesMatch) {
+    return res.status(400).json({ error: "Verification code mismatch" });
   }
 
-  const createdUser = await userToSave.save();
-  await sendVerificationEmail(createdUser);
-  loginAsUser(createdUser, res);
+  if (!foundUser.accountVerification.verified) {
+    foundUser.accountVerification = {
+      verified: true,
+      verificationDate: curDate,
+    };
+    foundUser = await foundUser.save();
+  }
+
+  loginAsUser(foundUser, res);
 });
 
 // Example endpoint for refreshing access token using refresh token

@@ -7,7 +7,6 @@ import PlantingSummary from "./PlantingSummary";
 
 export default function Plantings() {
   const { plantings, addNewPlanting } = usePlantingContext();
-  console.log("this is the page we're on!!");
   return (
     <div>
       <List dense>

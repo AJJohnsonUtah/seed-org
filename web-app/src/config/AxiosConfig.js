@@ -21,7 +21,7 @@ export function setupAxiosDefaults() {
   // Add response interceptor to handle 401 responses
   axios.interceptors.response.use(
     // Default to returning the data from any successful response. Cleans up services nicely
-    (r) => r.data,
+    undefined,
     async (error) => {
       const originalRequest = error.config;
 
@@ -39,6 +39,7 @@ export function setupAxiosDefaults() {
       } else if (error?.response?.status === 403) {
         // We're trying to do something hella sketch....... log 'em out and have 'em try again maybe?
         window.globalLogout();
+        return Promise.resolve();
       }
 
       // Return any other errors without modification

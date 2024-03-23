@@ -6,8 +6,11 @@ const authAxiosInstance = axios.create();
 authAxiosInstance.defaults.withCredentials = true;
 
 export const AuthenticationService = {
-  login: (email, password) => authAxiosInstance.post(AUTH_BASE_URL + "/login", { email, password }),
+  login: (email, password) => authAxiosInstance.post(AUTH_BASE_URL + "/login", { email, password }).then((r) => r.data),
+  signup: (email, password, displayName) =>
+    authAxiosInstance.post(AUTH_BASE_URL + "/newUser", { email, password, displayName }).then((r) => r.data),
   verifyEmail: (_id, verificationCode) =>
-  refreshToken: () => authAxiosInstance.get(AUTH_BASE_URL + "/refresh"),
+    authAxiosInstance.post(AUTH_BASE_URL + "/verifyEmail", { verificationCode, _id }).then((r) => r.data),
+  refreshToken: () => authAxiosInstance.get(AUTH_BASE_URL + "/refresh").then((r) => r.data),
   logout: () => authAxiosInstance.get(AUTH_BASE_URL + "/logout"),
 };

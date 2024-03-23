@@ -1,8 +1,16 @@
-import { CalendarMonth, Dashboard, Inventory, MonetizationOn, Person, Settings, Yard } from "@mui/icons-material";
+import {
+  CalendarMonth,
+  Dashboard,
+  Inventory,
+  Logout,
+  MonetizationOn,
+  Person,
+  Yard
+} from "@mui/icons-material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Menu, MenuItem } from "@mui/material";
+import { Container, Menu, MenuItem } from "@mui/material";
 import MuiAppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -20,6 +28,7 @@ import { styled, useTheme } from "@mui/material/styles";
 import * as React from "react";
 import { Link, Outlet } from "react-router-dom";
 import { useAuthContext } from "./common/context/AuthContext";
+import PlantingDialogContextProvider from "./common/context/PlantingDialogContext";
 
 const drawerWidth = 240;
 const openedMixin = (theme) => ({
@@ -81,15 +90,24 @@ export function ProfileMenu({ drawerOpen }) {
           horizontal: "left",
         }}
       >
+        <MenuItem disabled>{currentUser.displayName}</MenuItem>
+        <MenuItem>
+          <ListItemIcon>
+            <Person />
+          </ListItemIcon>
+          <ListItemText>Profile</ListItemText>
+        </MenuItem>
         <MenuItem
           onClick={() => {
             setAnchorEl(null);
             logOut();
           }}
         >
-          Sign Out
+          <ListItemIcon>
+            <Logout />
+          </ListItemIcon>
+          <ListItemText>Sign Out</ListItemText>
         </MenuItem>
-        <MenuItem>Profile</MenuItem>
       </Menu>
     </ListItem>
   );
@@ -162,44 +180,84 @@ export default function UserHome() {
     setOpen(false);
   };
 
+  if (currentUser && !currentUser?.accountVerification?.verified) {
+    return (
+      <Container>
+        <Typography variant="h5">
+          Hey {currentUser.displayName}. It looks like your email hasn't been verified - check your email (
+          {currentUser.email}) for the verification link to get started!
+        </Typography>
+      </Container>
+    );
+  }
+
   return (
-    <Box sx={{ display: "flex", height: "100%" }}>
-      <CssBaseline />
-      <AppBar position="fixed" open={open}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{
-              marginRight: 5,
-              ...(open && { display: "none" }),
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            {currentUser.primaryOrganization}
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Drawer variant="permanent" open={open} style={{ height: "100%" }}>
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        <List>
-          {[
-            { linkTo: "/dashboard", displayText: "Task Dashboard", icon: <Dashboard /> },
-            { linkTo: "/inventory", displayText: "Seed Inventory", icon: <Inventory /> },
-            { linkTo: "/schedule", displayText: "Planting Calendar", icon: <CalendarMonth /> },
-            { linkTo: "/plantings", displayText: "Plantings", icon: <Yard /> },
-            { linkTo: "/orders", displayText: "Orders", icon: <MonetizationOn /> },
-          ].map((navItem) => (
-            <ListItem key={navItem.displayText} disablePadding sx={{ display: "block" }}>
+    <PlantingDialogContextProvider>
+      <Box sx={{ display: "flex", height: "100%" }}>
+        <CssBaseline />
+        <AppBar position="fixed" open={open}>
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={{
+                marginRight: 5,
+                ...(open && { display: "none" }),
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" noWrap component="div">
+              {currentUser.primaryOrganization?.name}
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <Drawer variant="permanent" open={open} style={{ height: "100%" }}>
+          <DrawerHeader>
+            <IconButton onClick={handleDrawerClose}>
+              {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            </IconButton>
+          </DrawerHeader>
+          <Divider />
+          <List>
+            {[
+              { linkTo: "/dashboard", displayText: "Task Dashboard", icon: <Dashboard /> },
+              { linkTo: "/inventory", displayText: "Seed Inventory", icon: <Inventory /> },
+              { linkTo: "/schedule", displayText: "Planting Calendar", icon: <CalendarMonth /> },
+              { linkTo: "/plantings", displayText: "Plantings", icon: <Yard /> },
+              { linkTo: "/orders", displayText: "Orders", icon: <MonetizationOn /> },
+            ].map((navItem) => (
+              <ListItem key={navItem.displayText} disablePadding sx={{ display: "block" }}>
+                <ListItemButton
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: open ? "initial" : "center",
+                    px: 2.5,
+                  }}
+                  LinkComponent={Link}
+                  to={navItem.linkTo}
+                  aria-label={navItem.displayText}
+                >
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: open ? 3 : "auto",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {navItem.icon}
+                  </ListItemIcon>
+                  <ListItemText primary={navItem.displayText} sx={{ opacity: open ? 1 : 0 }} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+          <Box sx={{ flexGrow: 1 }} />
+          <List>
+            <ProfileMenu drawerOpen={open} />
+            {/* <ListItem disablePadding sx={{ display: "block" }}>
               <ListItemButton
                 sx={{
                   minHeight: 48,
@@ -207,8 +265,7 @@ export default function UserHome() {
                   px: 2.5,
                 }}
                 LinkComponent={Link}
-                to={navItem.linkTo}
-                aria-label={navItem.displayText}
+                to={"/settings"}
               >
                 <ListItemIcon
                   sx={{
@@ -217,44 +274,18 @@ export default function UserHome() {
                     justifyContent: "center",
                   }}
                 >
-                  {navItem.icon}
+                  {<Settings />}
                 </ListItemIcon>
-                <ListItemText primary={navItem.displayText} sx={{ opacity: open ? 1 : 0 }} />
+                <ListItemText primary={"Settings"} sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-        <Box sx={{ flexGrow: 1 }} />
-        <List>
-          <ProfileMenu drawerOpen={open} />
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              sx={{
-                minHeight: 48,
-                justifyContent: open ? "initial" : "center",
-                px: 2.5,
-              }}
-              LinkComponent={Link}
-              to={"/settings"}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : "auto",
-                  justifyContent: "center",
-                }}
-              >
-                {<Settings />}
-              </ListItemIcon>
-              <ListItemText primary={"Settings"} sx={{ opacity: open ? 1 : 0 }} />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3, overflow: "auto" }}>
-        <DrawerHeader />
-        <Outlet />
+            </ListItem> */}
+          </List>
+        </Drawer>
+        <Box component="main" sx={{ flexGrow: 1, p: 3, overflow: "auto" }}>
+          <DrawerHeader />
+          <Outlet />
+        </Box>
       </Box>
-    </Box>
+    </PlantingDialogContextProvider>
   );
 }

@@ -1,6 +1,5 @@
 import { Card, CardActionArea, CardMedia, Grid, Typography } from "@mui/material";
 import React from "react";
-import { getNumPlantsInArea, getRowWidthForTargetPlantCount } from "../PlantLayout/LayoutCalculator";
 import SeedDialog from "./SeedDialog";
 
 export default function SeedSummary({ seed, onSaveChanges, onDelete }) {
@@ -57,12 +56,6 @@ export default function SeedSummary({ seed, onSaveChanges, onDelete }) {
           </Grid>
           <Grid item xs={12} style={{ background: "rgba(255, 255, 255, 0.75)", paddingLeft: 6, paddingRight: 6 }}>
             {seed.minDtm === seed.maxDtm ? seed.minDtm : `${seed.minDtm}-${seed.maxDtm}`} DTM.{" "}
-            {getRowWidthForTargetPlantCount(36, seed.spacingInches, seed.seedsPerPacket * seed.numPackets) / 12} row ft.{" "}
-            {getNumPlantsInArea(
-              getRowWidthForTargetPlantCount(36, seed.spacingInches, seed.seedsPerPacket * seed.numPackets),
-              36,
-              seed.spacingInches
-            )}
           </Grid>
           <Grid
             item

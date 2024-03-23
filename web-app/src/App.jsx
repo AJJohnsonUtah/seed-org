@@ -3,16 +3,18 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import { ThemeProvider, createTheme } from "@mui/material";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
 import FloralMixCalendarDisplay from "./FloralMixCalendar/FloralMixCalendarDisplay";
+import LandingPage from "./Login/LandingPage";
 import LoginPage from "./Login/LoginPage";
+import SignUpPage from "./Login/SignUpPage";
+import VerifyEmailPage from "./Login/VerifyEmailPage";
 import DragDropPlantingContextProvider from "./PlantLayout/DragDropPlantingContext";
 import Plantings from "./PlantLayout/Plantings";
 import SeedList from "./SeedInventory/SeedList";
 import TaskDashboard from "./TaskDashboard/TaskDashboard";
 import UserHome from "./UserHome";
-import AuthContextProvider from "./common/context/AuthContext";
-import PlantingDialogContextProvider from "./common/context/PlantingDialogContext";
+import AuthContextProvider, { AuthRoute } from "./common/context/AuthContext";
 import { setupAxiosDefaults } from "./config/AxiosConfig";
 import Orders from "./orders/Orders";
 
@@ -44,15 +46,27 @@ const router = createBrowserRouter([
     path: "/",
     element: (
       <AuthContextProvider>
-        <PlantingDialogContextProvider>
-          <UserHome />
-        </PlantingDialogContextProvider>
+        <Outlet />
       </AuthContextProvider>
     ),
     children: [
       {
-        path: "/login",
-        element: <LoginPage />,
+        path: "/public",
+        element: <LandingPage />,
+        children: [
+          {
+            path: "login",
+            element: <LoginPage />,
+          },
+          {
+            path: "",
+            element: <LoginPage />,
+          },
+          {
+            path: "sign-up",
+            element: <SignUpPage />,
+          },
+        ],
       },
       {
         path: "/verify-email/:verificationCode/:userId",
@@ -60,31 +74,37 @@ const router = createBrowserRouter([
       },
       {
         path: "/",
-        element: <TaskDashboard />,
-      },
-      {
-        path: "/dashboard",
-        element: <TaskDashboard />,
-      },
-      {
-        path: "/inventory",
-        element: <SeedList />,
-      },
-      {
-        path: "/schedule",
-        element: <FloralMixCalendarDisplay />,
-      },
-      {
-        path: "/plantings",
         element: (
-          <DragDropPlantingContextProvider>
-            <Plantings />
-          </DragDropPlantingContextProvider>
+          <AuthRoute>
+            <UserHome />
+          </AuthRoute>
         ),
-      },
-      {
-        path: "/orders",
-        element: <Orders />,
+        children: [
+          {
+            path: "/dashboard",
+            element: <TaskDashboard />,
+          },
+          {
+            path: "/inventory",
+            element: <SeedList />,
+          },
+          {
+            path: "/schedule",
+            element: <FloralMixCalendarDisplay />,
+          },
+          {
+            path: "/plantings",
+            element: (
+              <DragDropPlantingContextProvider>
+                <Plantings />
+              </DragDropPlantingContextProvider>
+            ),
+          },
+          {
+            path: "/orders",
+            element: <Orders />,
+          },
+        ],
       },
     ],
   },
@@ -92,7 +112,7 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <div className="App" style={{ backgroundColor: "#CEEEFE", height: "100%" }}>
+    <div className="App" style={{ height: "100%" }}>
       <ThemeProvider theme={theme}>
         <RouterProvider router={router} />
       </ThemeProvider>

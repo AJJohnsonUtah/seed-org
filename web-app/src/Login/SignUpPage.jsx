@@ -1,14 +1,15 @@
-import { Alert, Button, CircularProgress, Container, Grid, TextField } from "@mui/material";
+import { Alert, Button, CircularProgress, Container, Grid, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 
 import { Link } from "react-router-dom";
 import { useAuthContext } from "../common/context/AuthContext";
 import { AuthenticationService } from "./../common/services/AuthenticationService";
-const LoginPage = () => {
+const SignUpPage = () => {
   const { loginAsUser } = useAuthContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [signupError, setSignUpError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleEmailChange = (e) => {
@@ -18,19 +19,22 @@ const LoginPage = () => {
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
   };
+  const handleDisplayNameChange = (e) => {
+    setDisplayName(e.target.value);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setLoginError("");
+    setSignUpError("");
     setSubmitting(true);
     // Handle form submission (e.g., send credentials to backend for authentication)
-    AuthenticationService.login(email, password)
+    AuthenticationService.signup(email, password, displayName)
       .then((user) => {
         loginAsUser(user);
       })
       .catch((err) => {
         if (err.response?.status === 401) {
-          setLoginError(err.response?.data.error);
+          setSignUpError(err.response?.data.error);
         }
       })
       .finally(() => setSubmitting(false));
@@ -39,8 +43,11 @@ const LoginPage = () => {
   return (
     <Container maxWidth="xs">
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <Typography variant="h5" gutterBottom>
+          New User
+        </Typography>
         <form onSubmit={handleSubmit} style={{ width: "100%", marginTop: "24px" }}>
-          <Grid container spacing={2} justifyContent={"center"}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
                 autoFocus
@@ -66,31 +73,41 @@ const LoginPage = () => {
                 onChange={handlePasswordChange}
               />
             </Grid>
-            <Grid item>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                style={{}}
-                disabled={submitting}
-                startIcon={
-                  submitting ? (
-                    <CircularProgress size="small" style={{ height: 16, width: 16 }} color="inherit" />
-                  ) : undefined
-                }
-              >
-                {submitting ? "Signing In..." : "Sign In"}
-              </Button>
+            <Grid item xs={12}>
+              <TextField
+                id="display-name"
+                fullWidth
+                variant="outlined"
+                label="Display Name"
+                value={displayName}
+                required
+                onChange={handleDisplayNameChange}
+              />
             </Grid>
           </Grid>
-          {loginError && <Alert severity="error">{loginError}</Alert>}
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            style={{ marginTop: "24px" }}
+            disabled={submitting}
+            startIcon={
+              submitting ? (
+                <CircularProgress size="small" style={{ height: 16, width: 16 }} color="inherit" />
+              ) : undefined
+            }
+          >
+            {submitting ? "Signing Up..." : "Sign Up"}
+          </Button>
+          {signupError && <Alert severity="error">{signupError}</Alert>}
         </form>
-        <Button component={Link} to="/public/sign-up" sx={{ mt: 3 }}>
-          New here? Sign up now
+        <Button component={Link} to="/public/login">
+          Already signed up? Log in here
         </Button>
       </div>
     </Container>
   );
 };
 
-export default LoginPage;
+export default SignUpPage;

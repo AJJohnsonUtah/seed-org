@@ -34,14 +34,14 @@ function addCommentEndpointsForModel(router, BaseModel) {
   /* POST new base comment */
   router.post("/:_id/comments", async function (req, res, next) {
     const baseWithComments = await getBaseComments(req.params._id);
-    req.body.user = getUserForComment();
+    req.body.user = req.user;
     baseWithComments.comments.push(req.body);
     res.send(await baseWithComments.save());
   });
 
   /* PUT base comment attachment*/
   router.put("/:_id/comments/:_commentId", async function (req, res, next) {
-    req.body.user = getUserForComment();
+    req.body.user = req.user;
     let result = await BaseModel.findByIdAndUpdate(
       req.params._id,
       {
