@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { CommentSchema } = require('./commentSchema');
+const { CommentSchema } = require("./commentSchema");
 
 const Schema = mongoose.Schema;
 
@@ -13,6 +13,7 @@ const PlantingSchema = new Schema(
     actualSpacingInches: Number,
     numSeeded: Number,
     numPlantedOut: Number,
+    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     comments: [CommentSchema],
     notes: String,
   },

@@ -23,7 +23,9 @@ function addCommentEndpointsForModel(router, BaseModel) {
   }
 
   async function getBaseComments(_id, includeAttachments) {
-    return await BaseModel.findById(_id).select("-comments.attachments.buffer").populate("comments.user");
+    return await BaseModel.findById(_id)
+      .select("-comments.attachments.buffer")
+      .populate("comments.user", "displayName _id profilePic");
   }
 
   /* GET base comments */
@@ -53,7 +55,7 @@ function addCommentEndpointsForModel(router, BaseModel) {
         arrayFilters: [{ "inner._id": req.params._commentId }],
         new: true,
       }
-    ).populate("comments.user");
+    ).populate("comments.user", "displayName _id profilePic");
     res.send(result);
   });
 
@@ -99,7 +101,7 @@ function addCommentEndpointsForModel(router, BaseModel) {
       },
       { new: true }
     )
-      .populate("comments.user")
+      .populate("comments.user", "displayName _id profilePic")
       .then((updatedBase) => {
         const updatedComment = updatedBase.comments.find((c) => c._id.equals(req.params._commentId));
         const newAttachment = updatedComment.attachments[updatedComment.attachments.length - 1];

@@ -15,6 +15,7 @@ import moment from "moment";
 import React, { useState } from "react";
 import CommentsSection from "../comments/CommentsSection";
 import { MyDateField } from "../common/components/MyDateField";
+import { useAuthContext } from "../common/context/AuthContext";
 import { PlantingService } from "../common/services/PlantingService";
 import { SeedInventoryService } from "../common/services/SeedInventoryService";
 import { LAST_FROST_32 } from "../data/FarmConstants";
@@ -22,7 +23,7 @@ import { MyTextField } from "./../common/components/MyTextField";
 
 export default function PlantingDialog({ open, planting, onSaveChanges, onCancel, onDelete }) {
   const [allSeeds, setAllSeeds] = React.useState([]);
-
+  const { isAdminForCurrentOrg, currentUser } = useAuthContext();
   React.useEffect(() => {
     SeedInventoryService.loadSeeds().then((s) => setAllSeeds([...s]));
   }, []);
@@ -196,7 +197,7 @@ export default function PlantingDialog({ open, planting, onSaveChanges, onCancel
         <Button type="button" onClick={onCancel} startIcon={<Cancel />} color="warning">
           Cancel
         </Button>
-        {planting?._id && (
+        {planting?._id && (isAdminForCurrentOrg || planting?.createdBy === currentUser?._id) && (
           <Button type="button" onClick={deletePlanting} startIcon={<Delete />} color="error">
             Delete
           </Button>

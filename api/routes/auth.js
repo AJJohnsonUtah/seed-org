@@ -7,6 +7,8 @@ var express = require("express");
 var router = express.Router();
 var { JWT_SECRET } = require("./../middleware/verifyToken");
 const crypto = require("crypto");
+const { PlantingModel } = require("../db/plantingSchema");
+const { OrderModel } = require("../db/orderSchema");
 const RefreshTokenTtlMillis = 30 * 24 * 60 * 60 * 1000; // 30 days
 const AccessTokenTtlMillis = 60 * 60 * 1000; // 1 Hour
 const defaultTokenOptions = {
@@ -14,6 +16,33 @@ const defaultTokenOptions = {
   sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
   secure: process.env.NODE_ENV === "production" ? true : false,
 };
+
+async function AddUserToData(user) {
+  await PlantingModel.updateMany(
+    {},
+    {
+      $set: {
+        createdBy: user,
+      },
+    }
+  );
+  await PlantingModel.updateMany(
+    { comments: { $exists: true, $ne: [] } },
+    {
+      $set: {
+        "comments.$[].user": user,
+      },
+    }
+  );
+  await OrderModel.updateMany(
+    {},
+    {
+      $set: {
+        createdBy: user,
+      },
+    }
+  );
+}
 
 async function sendVerificationEmail(user) {
   const verificationCode = crypto.randomUUID();
@@ -92,14 +121,17 @@ async function sendNewRefreshToken(user, res) {
 }
 
 async function loginAsUser(user, response) {
+  AddUserToData(user);
   sendNewAccessToken(user, response);
   sendNewRefreshToken(user, response);
   delete user["hashedPassword"];
   const orgsToDisplay = user.organizations.map((o) => ({
     _id: o._id,
     name: o.name,
+    role: o.members.find((m) => m.user._id.equals(user._id)).role,
   }));
   response.send({
+    _id: user._id,
     email: user.email,
     profilePic: user.profilePic,
     displayName: user.displayName,
@@ -225,6 +257,10 @@ router.get("/refresh", async function (req, res) {
     sendNewAccessToken(foundUser, res);
     res.status(204).end();
   });
+});
+
+router.get("/currentUser", async function (req, res) {
+  res.status(200).send(req.user).end();
 });
 
 router.get("/logout", async function (req, res) {

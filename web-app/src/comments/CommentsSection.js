@@ -18,6 +18,7 @@ import {
 import moment from "moment";
 import React from "react";
 import { MyTextField } from "../common/components/MyTextField";
+import { useAuthContext } from "../common/context/AuthContext";
 
 export function displayError(e) {
   alert(e.message);
@@ -157,8 +158,11 @@ export function EditableComment({ comment, onSaveChanges, getSrcForAttachment, o
 }
 
 export function CommentSummary({ comment, onClickEdit, onDelete, getSrcForAttachment }) {
+  const { isAdminForCurrentOrg, currentUser } = useAuthContext();
   const [menuAnchorEl, setMenuAnchorEl] = React.useState(null);
   const commentMenuOpen = Boolean(menuAnchorEl);
+  const currentUserLeftComment = comment.user._id === currentUser._id;
+  const showCommentActions = isAdminForCurrentOrg || currentUserLeftComment;
   return (
     <Grid container spacing={2} alignItems="start">
       <Grid item flexShrink={1}>
@@ -181,54 +185,58 @@ export function CommentSummary({ comment, onClickEdit, onDelete, getSrcForAttach
                 </Tooltip>
               </Grid>
               <Grid item flexGrow={1} />
-              <Grid item>
-                <IconButton
-                  size="small"
-                  aria-label="comment actions"
-                  id={"comment-menu-btn-" + comment._id}
-                  aria-controls={commentMenuOpen ? "comment-menu-" + comment._id : undefined}
-                  aria-expanded={commentMenuOpen ? "true" : undefined}
-                  onClick={(e) => setMenuAnchorEl(e.currentTarget)}
-                >
-                  <MoreHoriz />
-                </IconButton>
-                <Menu
-                  id={"comment-menu-" + comment._id}
-                  MenuListProps={{
-                    "aria-labelledby": "comment-menu-btn-" + comment._id,
-                  }}
-                  anchorEl={menuAnchorEl}
-                  open={commentMenuOpen}
-                  onClose={() => setMenuAnchorEl(null)}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                  }}
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                >
-                  <MenuItem onClick={onClickEdit}>
-                    <ListItemIcon>
-                      <Edit />
-                    </ListItemIcon>
-                    <ListItemText>Edit</ListItemText>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      if (window.confirm("Are you sure you want to delete this comment?")) {
-                        onDelete();
-                      }
+              {showCommentActions && (
+                <Grid item>
+                  <IconButton
+                    size="small"
+                    aria-label="comment actions"
+                    id={"comment-menu-btn-" + comment._id}
+                    aria-controls={commentMenuOpen ? "comment-menu-" + comment._id : undefined}
+                    aria-expanded={commentMenuOpen ? "true" : undefined}
+                    onClick={(e) => setMenuAnchorEl(e.currentTarget)}
+                  >
+                    <MoreHoriz />
+                  </IconButton>
+                  <Menu
+                    id={"comment-menu-" + comment._id}
+                    MenuListProps={{
+                      "aria-labelledby": "comment-menu-btn-" + comment._id,
+                    }}
+                    anchorEl={menuAnchorEl}
+                    open={commentMenuOpen}
+                    onClose={() => setMenuAnchorEl(null)}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "right",
+                    }}
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
                     }}
                   >
-                    <ListItemIcon>
-                      <Delete />
-                    </ListItemIcon>
-                    <ListItemText>Delete</ListItemText>
-                  </MenuItem>
-                </Menu>
-              </Grid>
+                    {currentUserLeftComment && (
+                      <MenuItem onClick={onClickEdit}>
+                        <ListItemIcon>
+                          <Edit />
+                        </ListItemIcon>
+                        <ListItemText>Edit</ListItemText>
+                      </MenuItem>
+                    )}
+                    <MenuItem
+                      onClick={() => {
+                        if (window.confirm("Are you sure you want to delete this comment?")) {
+                          onDelete();
+                        }
+                      }}
+                    >
+                      <ListItemIcon>
+                        <Delete />
+                      </ListItemIcon>
+                      <ListItemText>Delete</ListItemText>
+                    </MenuItem>
+                  </Menu>
+                </Grid>
+              )}
             </Grid>
             <Typography variant="body2">{comment.content}</Typography>
           </Grid>

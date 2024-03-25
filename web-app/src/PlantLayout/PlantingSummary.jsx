@@ -32,7 +32,7 @@ export default function PlantingSummary({ planting }) {
         <img
           src={planting.seedDetails.picUrl}
           alt={planting.seedDetails.name}
-          style={{ maxWidth: 40, borderRadius: 20 }}
+          style={{ maxWidth: 40, maxHeight: 40, borderRadius: 20 }}
         />
       </ListItemIcon>
       <ListItemText

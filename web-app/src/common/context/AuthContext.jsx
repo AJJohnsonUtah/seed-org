@@ -20,6 +20,9 @@ export function AuthRoute({ children }) {
 
 export default function AuthContextProvider({ children }) {
   const [currentUser, setCurrentUser] = useLocalStorage(CURRENT_USER_STORAGE_KEY, null);
+
+  const isAdminForCurrentOrg = currentUser?.primaryOrganization?.role?.includes("ADMIN");
+
   const navigate = useNavigate();
 
   function logOut() {
@@ -45,7 +48,9 @@ export default function AuthContextProvider({ children }) {
   }, [navigate, currentUser]);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn: Boolean(currentUser), currentUser, loginAsUser, logOut }}>
+    <AuthContext.Provider
+      value={{ isLoggedIn: Boolean(currentUser), currentUser, loginAsUser, logOut, isAdminForCurrentOrg }}
+    >
       {children}
     </AuthContext.Provider>
   );

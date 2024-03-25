@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { FileAttachmentSchema } = require('./fileAttachmentSchema');
+const { FileAttachmentSchema } = require("./fileAttachmentSchema");
 
 const Schema = mongoose.Schema;
 
@@ -20,6 +20,7 @@ const OrderSchema = new Schema(
     orderItems: [OrderItemSchema],
     orderAttachments: [FileAttachmentSchema],
     orderDate: String, // "yyyy-mm-dd"
+    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     notes: String,
   },
   { timestamps: true }
