@@ -1,8 +1,10 @@
 name: Deploy on Push
 
 on: 
- - push
- - workflow_dispatch
+  push:
+   branches:
+    - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,7 +16,7 @@ jobs:
       uses: actions/setup-node@v4.0.2
     - name: Install dependencies
       working-directory: ./web-app
-      run: npm install
+      run: npm ci
     - name: Build Webapp
       working-directory: ./web-app
       run: npm run build
@@ -46,4 +48,7 @@ jobs:
         username: 'root'
         port: 22
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: pm2 restart app-api
+        script: |
+          cd api
+          npm ci
+          pm2 restart app-api
