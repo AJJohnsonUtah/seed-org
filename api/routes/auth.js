@@ -59,6 +59,11 @@ async function sendVerificationEmail(user) {
   return savedUser;
 }
 
+async function logUserOut(res) {
+  res.clearCookie("REFRESH_TOKEN", { httpOnly: true });
+  res.clearCookie("ACCESS_TOKEN", { httpOnly: true });
+}
+
 async function addUserToOrganization(user, org) {
   if (!user.organizations) {
     user.organizations = [];
@@ -208,11 +213,13 @@ router.get("/refresh", async function (req, res) {
   // Validate refresh token and issue new access token
   jwt.verify(refreshToken, JWT_SECRET, async (err, decoded) => {
     if (err) {
-      return res.status(401).json({ error: "Unauthorized: Invalid refresh token" });
+      logUserOut(res);
+      return res.status(403).json({ error: "Unauthorized: Invalid refresh token" });
     }
     const foundUser = await UserModel.findById(decoded._id);
     // TODO: check if foundUser's status is still active/verified
     if (!foundUser) {
+      logUserOut(res);
       return res.status(403).json({ error: "Forbidden: User not found" });
     }
     sendNewAccessToken(foundUser, res);
@@ -221,8 +228,7 @@ router.get("/refresh", async function (req, res) {
 });
 
 router.get("/logout", async function (req, res) {
-  res.clearCookie("REFRESH_TOKEN", { httpOnly: true });
-  res.clearCookie("ACCESS_TOKEN", { httpOnly: true });
+  logUserOut(res);
   res.status(204).end();
 });
 

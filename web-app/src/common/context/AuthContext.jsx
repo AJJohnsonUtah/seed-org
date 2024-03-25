@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { AuthenticationService } from "../services/AuthenticationService";
 
+export const CURRENT_USER_STORAGE_KEY = "APP_CURRENT_USER";
 export const AuthContext = React.createContext();
 
 export function AuthRoute({ children }) {
@@ -18,7 +19,7 @@ export function AuthRoute({ children }) {
 }
 
 export default function AuthContextProvider({ children }) {
-  const [currentUser, setCurrentUser] = useLocalStorage("CURRENT_USER", null);
+  const [currentUser, setCurrentUser] = useLocalStorage(CURRENT_USER_STORAGE_KEY, null);
   const navigate = useNavigate();
 
   function logOut() {

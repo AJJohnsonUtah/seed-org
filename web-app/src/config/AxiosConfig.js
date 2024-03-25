@@ -1,4 +1,5 @@
 import axios from "axios";
+import { CURRENT_USER_STORAGE_KEY } from "../common/context/AuthContext";
 import { AuthenticationService } from "../common/services/AuthenticationService";
 
 // Function to refresh the authentication token
@@ -10,6 +11,12 @@ const refreshAuthToken = async (originalRequest) => {
     // Retry the original request that resulted in a 401 response
     return axios.request(originalRequest);
   } catch (error) {
+    // Log this poor expired user OUT
+    if (error.response.status === 403) {
+      localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
+      window.reload();
+    }
+
     // Handle refresh token failure or other errors
     throw error;
   }
