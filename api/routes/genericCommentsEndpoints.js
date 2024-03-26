@@ -1,18 +1,14 @@
+const {
+  saveFileContent,
+  ATTACHMENT_BASE_PATH,
+  deleteDirectory,
+  fileUpload,
+} = require("../common/fileHandlers");
+
 function addCommentEndpointsForModel(router, BaseModel) {
   const mongoose = require("mongoose");
   const multer = require("multer");
   require("./../db/userSchema");
-  // Multer storage configuration
-  const storage = multer.memoryStorage();
-  const upload = multer({ storage });
-  const fs = require("node:fs");
-
-  const ATTACHMENT_BASE_PATH = process.env.NODE_ENV === "production" ? "/app-attachments" : "attachments";
-
-  function saveAttachmentContent(path, filename, content) {
-    fs.mkdirSync(path, { recursive: true });
-    fs.writeFileSync(path + "/" + filename, content);
-  }
 
   function getUserForComment() {
     return {
@@ -63,7 +59,7 @@ function addCommentEndpointsForModel(router, BaseModel) {
   router.delete("/:_id/comments/:_commentId", function (req, res, next) {
     try {
       const dirToDelete = `${ATTACHMENT_BASE_PATH}/${req.params._id}/${req.params._commentId}`;
-      fs.rmSync(dirToDelete, { recursive: true, force: true });
+      deleteDirectory(dirToDelete);
     } catch (err) {
       if (!err.message.includes("no such file or directory")) {
         throw err;
@@ -85,7 +81,7 @@ function addCommentEndpointsForModel(router, BaseModel) {
   });
 
   /* POST base comment attachment*/
-  router.post("/:_id/comments/:_commentId/fileAttachment", upload.single("file"), async function (req, res) {
+  router.post("/:_id/comments/:_commentId/fileAttachment", fileUpload.single("file"), async function (req, res) {
     const dbAttachment = {
       name: req.file.originalname,
       contentType: req.file.contentType,
@@ -105,7 +101,7 @@ function addCommentEndpointsForModel(router, BaseModel) {
       .then((updatedBase) => {
         const updatedComment = updatedBase.comments.find((c) => c._id.equals(req.params._commentId));
         const newAttachment = updatedComment.attachments[updatedComment.attachments.length - 1];
-        saveAttachmentContent(
+        saveFileContent(
           `${ATTACHMENT_BASE_PATH}/${req.params._id}/${req.params._commentId}/${newAttachment._id}`,
           newAttachment.name,
           req.file.buffer

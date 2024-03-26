@@ -24,6 +24,7 @@ export default function AuthContextProvider({ children }) {
   const isAdminForCurrentOrg = currentUser?.primaryOrganization?.role?.includes("ADMIN");
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   function logOut() {
     setCurrentUser(null);
@@ -42,10 +43,10 @@ export default function AuthContextProvider({ children }) {
   React.useEffect(() => {
     if (!currentUser) {
       navigate("/public");
-    } else {
+    } else if (location.pathname.startsWith("/public") || location.pathname.startsWith("/verify-email")) {
       navigate("/dashboard");
     }
-  }, [navigate, currentUser]);
+  }, [navigate, currentUser, location.pathname]);
 
   return (
     <AuthContext.Provider

@@ -10,13 +10,12 @@ var bodyParser = require("body-parser");
 // Configure properties. Get 'em from both of 'em
 require("dotenv").config({ path: ["./../.env", "./../.env.local"] });
 
-
+var authRouter = require("./routes/auth");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var seedDetailsRouter = require("./routes/seedDetails");
 var plantingsRouter = require("./routes/plantings");
 var ordersRouter = require("./routes/orders");
-var authRouter = require("./routes/auth");
 var { verifyToken } = require("./middleware/verifyToken");
 var app = express();
 

@@ -1,6 +1,5 @@
-import { AddAPhoto, AddComment, Close, Delete, Edit, MoreHoriz, Person, Save } from "@mui/icons-material";
+import { AddAPhoto, AddComment, Close, Delete, Edit, MoreHoriz, Save } from "@mui/icons-material";
 import {
-  Avatar,
   Button,
   CircularProgress,
   FormHelperText,
@@ -13,11 +12,12 @@ import {
   Paper,
   Skeleton,
   Tooltip,
-  Typography,
+  Typography
 } from "@mui/material";
 import moment from "moment";
 import React from "react";
 import { MyTextField } from "../common/components/MyTextField";
+import UserAvatar from "../common/components/UserAvatar";
 import { useAuthContext } from "../common/context/AuthContext";
 
 export function displayError(e) {
@@ -31,6 +31,7 @@ export function EditableComment({ comment, onSaveChanges, getSrcForAttachment, o
   const [inputImageValue, setInputImageValue] = React.useState("");
   const [saving, setSaving] = React.useState(false);
   const saveCommentButtonId = "save-comment-btn" + (comment?._id ? `-${comment._id}` : "");
+  const { currentUser } = useAuthContext();
 
   React.useEffect(() => {
     document.getElementById(saveCommentButtonId).scrollIntoView({ behavior: "smooth", block: "end", inline: "end" });
@@ -67,9 +68,7 @@ export function EditableComment({ comment, onSaveChanges, getSrcForAttachment, o
     >
       <Grid container spacing={2}>
         <Grid item flexShrink={1}>
-          <Avatar>
-            <Person />
-          </Avatar>
+          <UserAvatar user={currentUser} />
         </Grid>
         <Grid item flexGrow={1}>
           <Grid container spacing={1} style={{ backgroundColor: "#DEDEFE", padding: 2, borderRadius: 4 }}>
@@ -166,9 +165,7 @@ export function CommentSummary({ comment, onClickEdit, onDelete, getSrcForAttach
   return (
     <Grid container spacing={2} alignItems="start">
       <Grid item flexShrink={1}>
-        <Avatar>
-          <Person />
-        </Avatar>
+        <UserAvatar user={comment.user} />
       </Grid>
       <Grid item flexGrow={1} style={{ width: "calc(100% - 56px)" }}>
         <Grid container spacing={1} style={{ backgroundColor: "#DEDEFE", padding: 2, borderRadius: 4 }}>

@@ -17,33 +17,6 @@ const defaultTokenOptions = {
   secure: process.env.NODE_ENV === "production" ? true : false,
 };
 
-async function AddUserToData(user) {
-  await PlantingModel.updateMany(
-    {},
-    {
-      $set: {
-        createdBy: user,
-      },
-    }
-  );
-  await PlantingModel.updateMany(
-    { comments: { $exists: true, $ne: [] } },
-    {
-      $set: {
-        "comments.$[].user": user,
-      },
-    }
-  );
-  await OrderModel.updateMany(
-    {},
-    {
-      $set: {
-        createdBy: user,
-      },
-    }
-  );
-}
-
 async function sendVerificationEmail(user) {
   const verificationCode = crypto.randomUUID();
 
@@ -121,7 +94,6 @@ async function sendNewRefreshToken(user, res) {
 }
 
 async function loginAsUser(user, response) {
-  AddUserToData(user);
   sendNewAccessToken(user, response);
   sendNewRefreshToken(user, response);
   delete user["hashedPassword"];
@@ -157,7 +129,6 @@ router.post("/login", async function (req, res) {
   const { email, password } = req.body;
   // Mock user data for demonstration (replace with actual database queries)
   const foundUser = await UserModel.findOne({ email: email.toLocaleLowerCase() }).populate("organizations");
-  console.log(foundUser);
   // Check if the email exists and passwords match
   if (!foundUser || !(await bcrypt.compare(password, foundUser.hashedPassword))) {
     return res.status(401).json({ error: "Invalid email or password" });
@@ -257,10 +228,6 @@ router.get("/refresh", async function (req, res) {
     sendNewAccessToken(foundUser, res);
     res.status(204).end();
   });
-});
-
-router.get("/currentUser", async function (req, res) {
-  res.status(200).send(req.user).end();
 });
 
 router.get("/logout", async function (req, res) {

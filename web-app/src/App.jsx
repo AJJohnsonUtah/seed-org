@@ -11,6 +11,7 @@ import SignUpPage from "./Login/SignUpPage";
 import VerifyEmailPage from "./Login/VerifyEmailPage";
 import DragDropPlantingContextProvider from "./PlantLayout/DragDropPlantingContext";
 import Plantings from "./PlantLayout/Plantings";
+import EditProfile from "./Profile/EditProfile";
 import SeedList from "./SeedInventory/SeedList";
 import TaskDashboard from "./TaskDashboard/TaskDashboard";
 import UserHome from "./UserHome";
@@ -103,6 +104,10 @@ const router = createBrowserRouter([
           {
             path: "/orders",
             element: <Orders />,
+          },
+          {
+            path: "/profile",
+            element: <EditProfile />,
           },
         ],
       },

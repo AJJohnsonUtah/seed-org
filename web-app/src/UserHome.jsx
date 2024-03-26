@@ -19,6 +19,7 @@ import Typography from "@mui/material/Typography";
 import { styled, useTheme } from "@mui/material/styles";
 import * as React from "react";
 import { Link, Outlet } from "react-router-dom";
+import UserAvatar from "./common/components/UserAvatar";
 import { useAuthContext } from "./common/context/AuthContext";
 import PlantingDialogContextProvider from "./common/context/PlantingDialogContext";
 
@@ -61,9 +62,9 @@ export function ProfileMenu({ drawerOpen }) {
             justifyContent: "center",
           }}
         >
-          {<Person />}
+          {<UserAvatar user={currentUser} />}
         </ListItemIcon>
-        <ListItemText primary={"Profile"} sx={{ opacity: drawerOpen ? 1 : 0 }} />
+        <ListItemText primary={"My Account"} sx={{ opacity: drawerOpen ? 1 : 0 }} />
       </ListItemButton>
       <Menu
         id="profile-menu"
@@ -83,7 +84,7 @@ export function ProfileMenu({ drawerOpen }) {
         }}
       >
         <MenuItem disabled>{currentUser.displayName}</MenuItem>
-        <MenuItem>
+        <MenuItem component={Link} to="/profile">
           <ListItemIcon>
             <Person />
           </ListItemIcon>
