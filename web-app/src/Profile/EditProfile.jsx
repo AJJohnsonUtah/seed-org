@@ -1,5 +1,5 @@
 import { AddAPhoto, Edit } from "@mui/icons-material";
-import { Avatar, Grid, IconButton, Skeleton, Typography } from "@mui/material";
+import { Avatar, CircularProgress, Grid, IconButton, Skeleton, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "../common/context/AuthContext";
 import { UserService } from "../common/services/UserService";
@@ -9,7 +9,6 @@ export default function EditProfile() {
   const [fullUserInfo, setFullUserInfo] = useState();
   const [inputImageValue] = React.useState("");
   const [uploading, setUploading] = React.useState(false);
-
 
   useEffect(() => {
     UserService.getCurrentAuthUser().then(setFullUserInfo);
@@ -38,8 +37,15 @@ export default function EditProfile() {
                 },
               }}
               onClick={() => document.getElementById("add-image-btn" + fullUserInfo?._id).click()}
+              disabled={uploading}
             >
-              {fullUserInfo.profilePic ? <Edit /> : <AddAPhoto />}
+              {uploading ? (
+                <CircularProgress style={{ height: 24, width: 24 }} />
+              ) : fullUserInfo.profilePic ? (
+                <Edit />
+              ) : (
+                <AddAPhoto />
+              )}
             </IconButton>
             <input
               id={"add-image-btn" + fullUserInfo?._id}
