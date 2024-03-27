@@ -4,6 +4,7 @@ const { OrganizationModel } = require("../db/organizationSchema");
 const bcrypt = require("bcryptjs");
 var express = require("express");
 var router = express.Router();
+const jwt = require("jsonwebtoken");
 var { JWT_SECRET } = require("./../middleware/verifyToken");
 const crypto = require("crypto");
 const { PlantingModel } = require("../db/plantingSchema");
