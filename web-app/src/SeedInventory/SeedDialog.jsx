@@ -49,7 +49,7 @@ export default function SeedDialog({ open, seed, onSaveChanges, onCancel, onDele
   const [typeOfPlant, setTypeOfPlant] = useState(seed?.typeOfPlant);
   const [plantColors, setPlantColors] = useState(seed?.plantColors || []);
   const [supportNeeded, setSupportNeeded] = useState(seed?.supportNeeded || []);
-  const { isAdminForCurrentOrg, currentUser } = useAuthContext();
+  const { isAdminForCurrentOrg } = useAuthContext();
 
   function deleteSeedDetails() {
     if (window.confirm("Are you sure you want to delete " + name + " [_id: " + seed._id + "]?")) {
