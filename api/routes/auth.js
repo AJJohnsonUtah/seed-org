@@ -2,20 +2,15 @@ const moment = require("moment");
 const { UserModel } = require("../db/userSchema");
 const { OrganizationModel } = require("../db/organizationSchema");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 var express = require("express");
 var router = express.Router();
 var { JWT_SECRET } = require("./../middleware/verifyToken");
 const crypto = require("crypto");
 const { PlantingModel } = require("../db/plantingSchema");
 const { OrderModel } = require("../db/orderSchema");
-const RefreshTokenTtlMillis = 30 * 24 * 60 * 60 * 1000; // 30 days
-const AccessTokenTtlMillis = 60 * 60 * 1000; // 1 Hour
-const defaultTokenOptions = {
-  httpOnly: true,
-  sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-  secure: process.env.NODE_ENV === "production" ? true : false,
-};
+const OrganizationService = require("../services/organizationService");
+const EmailService = require("../services/emailService");
+const TokenService = require("../services/tokenService");
 
 async function sendVerificationEmail(user) {
   const verificationCode = crypto.randomUUID();
@@ -30,34 +25,17 @@ async function sendVerificationEmail(user) {
 
   const savedUser = await user.save();
 
-  var nodemailer = require("nodemailer");
-
-  var transporter = nodemailer.createTransport({
-    host: "smtp.titan.email",
-    port: 587,
-    auth: {
-      user: "no-reply@flowerboy.app",
-      pass: process.env.TITAN_MAIL_PASSWORD,
-    },
-  });
-
   const verificationUrl =
     process.env.NODE_ENV === "production"
       ? "https://flowerboy.app/verify-email/" + user.accountVerification.verificationCode + "/" + user._id
       : "http://192.168.86.68:3000/verify-email/" + user.accountVerification.verificationCode + "/" + user._id;
 
-  var mailOptions = {
-    from: '"Flower Boy" <no-reply@flowerboy.app>',
-    to: user.email,
-    subject: "Verify Your Email",
-    text: `Welcome to Flower Boy`,
-    html: `<!DOCTYPE html>
-    <html lang="en"><body><p>Hey there ${user.displayName}!</p><p>Click <a href="${verificationUrl}">HERE</a> to verify your email!</p>
-    <p>Let's get growing!</p></body></html>
-    `,
-  };
+  const emailSubject = "Verify Your Email";
+  const emailBody = `<!DOCTYPE html>
+      <html lang="en"><body><p>Hey there ${user.displayName}!</p><p>Click <a href="${verificationUrl}">HERE</a> to verify your email!</p>
+      <p>Let's get growing!</p></body></html>`;
+  EmailService.sendEmail(user.email, emailSubject, emailBody);
 
-  const emailResult = await transporter.sendMail(mailOptions);
   return savedUser;
 }
 
@@ -66,36 +44,9 @@ async function logUserOut(res) {
   res.clearCookie("ACCESS_TOKEN", { httpOnly: true });
 }
 
-async function addUserToOrganization(user, org) {
-  if (!user.organizations) {
-    user.organizations = [];
-  }
-  user.organizations.push(org);
-
-  const userWithOrgAdded = await user.save().then((u) => u.populate("organizations"));
-
-  if (!org.members) {
-    org.members = [];
-  }
-  org.members.push({ role: ["ADMIN"], user: userWithOrgAdded });
-
-  const orgWithUserAdded = await org.save();
-  return userWithOrgAdded;
-}
-
-async function sendNewRefreshToken(user, res) {
-  // Generate refresh token
-  const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "30d" });
-  res.cookie("REFRESH_TOKEN", token, {
-    ...defaultTokenOptions,
-    maxAge: RefreshTokenTtlMillis,
-    path: process.env.NODE_ENV === "production" ? "/api/auth/refresh" : "/auth/refresh",
-  });
-}
-
 async function loginAsUser(user, response) {
-  sendNewAccessToken(user, response);
-  sendNewRefreshToken(user, response);
+  TokenService.sendNewAccessToken(user, response);
+  TokenService.sendNewRefreshToken(user, response);
   delete user["hashedPassword"];
   const orgsToDisplay = user.organizations.map((o) => ({
     _id: o._id,
@@ -112,16 +63,6 @@ async function loginAsUser(user, response) {
     },
     organizations: orgsToDisplay,
   });
-}
-
-async function sendNewAccessToken(user, res) {
-  // Generate access token
-  const token = jwt.sign(
-    { _id: user._id, email: user.email, profilePic: user?.profilePic, displayName: user.displayName },
-    JWT_SECRET,
-    { expiresIn: "30s" }
-  );
-  res.cookie("ACCESS_TOKEN", token, { ...defaultTokenOptions, maxAge: AccessTokenTtlMillis });
 }
 
 /* Handle login attempt */
@@ -141,14 +82,13 @@ router.post("/login", async function (req, res) {
 /* Create new user */
 router.post("/newUser", async function (req, res) {
   const { email, password, displayName } = req.body;
-
-  const foundUser = await UserModel.findOne({ email: email.toLocaleLowerCase() });
+  const standardizedEmail = email.toLocaleLowerCase();
+  const foundUser = await UserModel.findOne({ email: standardizedEmail });
   const hashedPassword = await bcrypt.hash(password, 11);
 
   if (foundUser && foundUser.accountVerification.verified) {
     return res.status(400).json({ error: "Account with this email already exists" });
   }
-  const GULB_ORG = await OrganizationModel.findOne({});
   let userToVerify;
 
   if (foundUser && !foundUser.accountVerification.verified) {
@@ -158,7 +98,7 @@ router.post("/newUser", async function (req, res) {
     userToVerify = await foundUser.save();
   } else {
     const userToSave = new UserModel({
-      email: email.toLocaleLowerCase(),
+      email: standardizedEmail,
       hashedPassword,
       displayName,
       accountVerification: {
@@ -168,10 +108,15 @@ router.post("/newUser", async function (req, res) {
     userToVerify = await userToSave.save();
   }
 
-  const userWithOrg = await addUserToOrganization(userToVerify, GULB_ORG);
+  // Add user to any orgs they are a "pending member" of
+  const orgsInvitedTo = await OrganizationModel.find({ pendingMembers: { email: standardizedEmail } });
+  let userWithOrgs = userToVerify;
+  for (const org of orgsInvitedTo) {
+    userWithOrgs = await OrganizationService.addUserToOrganization(userWithOrgs, org, ["CONTRIBUTOR"]);
+  }
 
-  await sendVerificationEmail(userWithOrg);
-  loginAsUser(userWithOrg, res);
+  await sendVerificationEmail(userWithOrgs);
+  loginAsUser(userWithOrgs, res);
 });
 
 /* Verify user email */
@@ -225,7 +170,7 @@ router.get("/refresh", async function (req, res) {
       logUserOut(res);
       return res.status(403).json({ error: "Forbidden: User not found" });
     }
-    sendNewAccessToken(foundUser, res);
+    TokenService.sendNewAccessToken(foundUser, res);
     res.status(204).end();
   });
 });

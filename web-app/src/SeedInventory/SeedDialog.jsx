@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { MyTextField } from "../common/components/MyTextField";
+import { useAuthContext } from "../common/context/AuthContext";
 import { SeedInventoryService } from "../common/services/SeedInventoryService";
 
 export function ColorChip({ color, onDelete }) {
@@ -48,6 +49,7 @@ export default function SeedDialog({ open, seed, onSaveChanges, onCancel, onDele
   const [typeOfPlant, setTypeOfPlant] = useState(seed?.typeOfPlant);
   const [plantColors, setPlantColors] = useState(seed?.plantColors || []);
   const [supportNeeded, setSupportNeeded] = useState(seed?.supportNeeded || []);
+  const { isAdminForCurrentOrg, currentUser } = useAuthContext();
 
   function deleteSeedDetails() {
     if (window.confirm("Are you sure you want to delete " + name + " [_id: " + seed._id + "]?")) {
@@ -255,7 +257,7 @@ export default function SeedDialog({ open, seed, onSaveChanges, onCancel, onDele
           <Button type="button" onClick={onCancel} startIcon={<Cancel />} color="warning">
             Cancel
           </Button>
-          {seed?._id && (
+          {seed?._id && isAdminForCurrentOrg && (
             <Button type="button" onClick={deleteSeedDetails} startIcon={<Delete />} color="error">
               Delete
             </Button>

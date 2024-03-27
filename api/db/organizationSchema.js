@@ -14,6 +14,13 @@ const OrganizationSchema = new Schema(
         role: [String],
       },
     ],
+    pendingMembers: [
+      {
+        role: [String],
+        email: String,
+        invitedDate: String, // ISO string
+      },
+    ],
   },
   { timestamps: true }
 );

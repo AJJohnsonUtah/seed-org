@@ -12,10 +12,11 @@ import VerifyEmailPage from "./Login/VerifyEmailPage";
 import DragDropPlantingContextProvider from "./PlantLayout/DragDropPlantingContext";
 import Plantings from "./PlantLayout/Plantings";
 import EditProfile from "./Profile/EditProfile";
+import ManageOrganization from "./Profile/Organization/ManageOrganization";
 import SeedList from "./SeedInventory/SeedList";
 import TaskDashboard from "./TaskDashboard/TaskDashboard";
 import UserHome from "./UserHome";
-import AuthContextProvider, { AuthRoute } from "./common/context/AuthContext";
+import AuthContextProvider, { AuthRoute, NonAuthRoute } from "./common/context/AuthContext";
 import { setupAxiosDefaults } from "./config/AxiosConfig";
 import Orders from "./orders/Orders";
 
@@ -53,7 +54,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/public",
-        element: <LandingPage />,
+        element: (
+          <NonAuthRoute>
+            <LandingPage />
+          </NonAuthRoute>
+        ),
         children: [
           {
             path: "login",
@@ -108,6 +113,10 @@ const router = createBrowserRouter([
           {
             path: "/profile",
             element: <EditProfile />,
+          },
+          {
+            path: "/organization/:organizationId",
+            element: <ManageOrganization />,
           },
         ],
       },

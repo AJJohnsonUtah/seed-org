@@ -13,6 +13,7 @@ require("dotenv").config({ path: ["./../.env", "./../.env.local"] });
 var authRouter = require("./routes/auth");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
+var organizationsRouter = require("./routes/organizations");
 var seedDetailsRouter = require("./routes/seedDetails");
 var plantingsRouter = require("./routes/plantings");
 var ordersRouter = require("./routes/orders");
@@ -39,6 +40,7 @@ app.use(verifyToken);
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/organizations", organizationsRouter);
 app.use("/seedDetails", seedDetailsRouter);
 app.use("/plantings", plantingsRouter);
 app.use("/orders", ordersRouter);

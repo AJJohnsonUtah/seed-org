@@ -46,63 +46,65 @@ export function ProfileMenu({ drawerOpen }) {
   }
 
   return (
-    <ListItem disablePadding sx={{ display: "block" }}>
-      <ListItemButton
-        sx={{
-          minHeight: 48,
-          justifyContent: drawerOpen ? "initial" : "center",
-          px: 2.5,
-        }}
-        onClick={handleClick}
-      >
-        <ListItemIcon
+    <List>
+      <ListItem disablePadding sx={{ display: "block" }}>
+        <ListItemButton
           sx={{
-            minWidth: 0,
-            mr: drawerOpen ? 3 : "auto",
-            justifyContent: "center",
+            minHeight: 48,
+            justifyContent: drawerOpen ? "initial" : "center",
+            px: 2.5,
+          }}
+          onClick={handleClick}
+        >
+          <ListItemIcon
+            sx={{
+              minWidth: 0,
+              mr: drawerOpen ? 3 : "auto",
+              justifyContent: "center",
+            }}
+          >
+            {<UserAvatar user={currentUser} />}
+          </ListItemIcon>
+          <ListItemText primary={"My Account"} sx={{ opacity: drawerOpen ? 1 : 0 }} />
+        </ListItemButton>
+        <Menu
+          id="profile-menu"
+          MenuListProps={{
+            "aria-labelledby": "profile-menu-btn-",
+          }}
+          open={Boolean(anchorEl)}
+          anchorEl={anchorEl}
+          onClose={onClose}
+          anchorOrigin={{
+            vertical: "center",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "center",
+            horizontal: "left",
           }}
         >
-          {<UserAvatar user={currentUser} />}
-        </ListItemIcon>
-        <ListItemText primary={"My Account"} sx={{ opacity: drawerOpen ? 1 : 0 }} />
-      </ListItemButton>
-      <Menu
-        id="profile-menu"
-        MenuListProps={{
-          "aria-labelledby": "profile-menu-btn-",
-        }}
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={onClose}
-        anchorOrigin={{
-          vertical: "center",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "center",
-          horizontal: "left",
-        }}
-      >
-        <MenuItem disabled>{currentUser.displayName}</MenuItem>
-        <MenuItem component={Link} to="/profile">
-          <ListItemIcon>
-            <Person />
-          </ListItemIcon>
-          <ListItemText>Profile</ListItemText>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setAnchorEl(null);
-            logOut();
-          }}
-        >
-          <ListItemIcon>
-            <Logout />
-          </ListItemIcon>
-          <ListItemText>Sign Out</ListItemText>
-        </MenuItem>
-      </Menu>
-    </ListItem>
+          <MenuItem disabled>{currentUser.displayName}</MenuItem>
+          <MenuItem component={Link} to="/profile">
+            <ListItemIcon>
+              <Person />
+            </ListItemIcon>
+            <ListItemText>Profile</ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null);
+              logOut();
+            }}
+          >
+            <ListItemIcon>
+              <Logout />
+            </ListItemIcon>
+            <ListItemText>Sign Out</ListItemText>
+          </MenuItem>
+        </Menu>
+      </ListItem>
+    </List>
   );
 }
 
@@ -250,31 +252,7 @@ export default function UserHome() {
             ))}
           </List>
           <Box sx={{ flexGrow: 1 }} />
-          <List>
-            <ProfileMenu drawerOpen={open} />
-            {/* <ListItem disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                }}
-                LinkComponent={Link}
-                to={"/settings"}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : "auto",
-                    justifyContent: "center",
-                  }}
-                >
-                  {<Settings />}
-                </ListItemIcon>
-                <ListItemText primary={"Settings"} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem> */}
-          </List>
+          <ProfileMenu drawerOpen={open} />
         </Drawer>
         <Box component="main" sx={{ flexGrow: 1, p: 3, overflow: "auto" }}>
           <DrawerHeader />

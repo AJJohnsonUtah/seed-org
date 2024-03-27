@@ -20,6 +20,7 @@ import {
 import React from "react";
 import { MyDateField } from "../common/components/MyDateField";
 import { MyTextField } from "../common/components/MyTextField";
+import { useAuthContext } from "../common/context/AuthContext";
 import { OrderService } from "../common/services/OrderService";
 import { SeedInventoryService } from "../common/services/SeedInventoryService";
 
@@ -200,7 +201,7 @@ export default function OrderDialog({ open, orderToEdit, onSave, onDelete, onCan
   const [notes, setNotes] = React.useState(orderToEdit?.notes || "");
   const [itemToAdd, setItemToAdd] = React.useState({});
   const [hasSubmitted, setHasSubmitted] = React.useState(false);
-
+  const { currentUser, isAdminForCurrentOrg } = useAuthContext();
   let itemCostPretax = 0;
   for (let i = 0; i < orderItems.length; i++) {
     itemCostPretax += getCostNumber(orderItems[i].unitCost) * getCostNumber(orderItems[i].quantity);
@@ -369,7 +370,7 @@ export default function OrderDialog({ open, orderToEdit, onSave, onDelete, onCan
         <Button type="button" onClick={onCancel} startIcon={<Cancel />} color="warning">
           Cancel
         </Button>
-        {orderToEdit?._id && (
+        {orderToEdit?._id && (currentUser._id === orderToEdit?.createdBy || isAdminForCurrentOrg) && (
           <Button type="button" onClick={deleteOrder} startIcon={<Delete />} color="error">
             Delete
           </Button>
