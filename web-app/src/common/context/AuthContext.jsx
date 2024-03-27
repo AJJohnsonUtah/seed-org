@@ -31,6 +31,10 @@ export function AuthRoute({ children }) {
     }
   }, [currentUser, navigate]);
 
+  if (!currentUser) {
+    return null;
+  }
+
   if (currentUser?.primaryOrganization) {
     return <>{children}</>;
   } else {
